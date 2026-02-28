@@ -1,0 +1,41 @@
+.mensaje-alerta {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.mensaje-procesando {
+  background-color: #e0e7ff; 
+  border: 1px solid #4338ca;
+  color: #4338ca;
+}
+.mensaje-error {
+  background-color: #fef2f2; 
+  border: 1px solid #b91c1c; 
+  color: #991b1b;
+}
+.mensaje-exito {
+  background-color: #ecfdf5; 
+  border: 1px solid #059669; 
+  color: #065f46;
+}
+/* Transiciones entre mensajes */
+.mensaje-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.mensaje-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+.mensaje-fade-enter-from, .mensaje-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}

@@ -1,0 +1,71 @@
+.icono {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+}
+/* .boton .icono {
+  margin-right: 0.5rem;
+} */
+.boton {
+  display:inline-flex;
+  /* flex-direction: row; */
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  min-height: 40px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 0.5rem;
+  background: #555;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.boton:active {
+  transform: scale(0.98);
+}
+@media (hover: hover) and (pointer: fine) {
+  .boton:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    filter: brightness(1.5);
+  }
+}
+.boton-show {
+  background-color: #377993;
+}
+.boton-edit, .boton-reset {
+  background-color: #CC7A00;
+}
+.boton-delete {
+  background-color: #dc3545
+}
+.boton-cancel {
+  background-color: #6b7280;
+}
+.boton-refresh {
+  background-color: #a83874;
+}
+.boton-add {
+  background-color: #495da5;
+}
+.boton-back {
+  background-color: #6a57a8;
+}
+.boton-accept {
+  background-color: #257738;
+}
+.boton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+  opacity: 0.7;
+}
