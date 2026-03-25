@@ -1,17 +1,20 @@
 <script setup lang="ts">
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { onMounted } from 'vue'
 
   const router = useRouter()
+  const route = useRoute()
 
   onMounted(() => {
-    router.push({ name: 'especialidades_list' })
+    if (route.name === 'especialidades') {
+      router.push({ name: 'especialidades_list' })
+    } 
   })
 </script>
 
 <template>
-  <h1>Administración de Especialidades</h1>
-  <router-view/>
+  <router-view />
 </template>
+
 
 <style scoped></style>

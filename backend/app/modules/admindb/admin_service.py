@@ -1,7 +1,6 @@
 import mysql.connector
 
 from db_init import DB_CONFIG, DB_NAME, TABLES, SEEDS, create_database, create_tables, seeds_tables
-from db_rollback import DROPPED_TB 
 
 def get_connection(with_db=True):
   #Crear una conexion
@@ -40,6 +39,7 @@ def run_setup():
 def run_seed():
   conn = None
   try:
+    run_setup()
     # Intentar conectarse a la base de datos configurada
     config = DB_CONFIG.copy()
     config['database'] = DB_NAME
@@ -49,15 +49,11 @@ def run_seed():
     seeds_tables(SEEDS, cursor)
     conn.commit()
   except mysql.connector.Error as err:
-    # La base de datos no existe
-    if err.errno == 1049:
-      raise Exception(f"No se encuentra la base de datos '{DB_NAME}'. Primero debe usar 'Crear Estructura'.")
-    # La tabla no existe
-    elif err.errno == 1146:
-      raise Exception("Las tablas no existen. Debe crear la estructura antes de cargar datos.")
-    else:
-    # Otros errrores
-      raise Exception(f"Error de base de datos: {err.msg}")
+    # Cualquier error de MySQL (duplicados, error de sintaxis, etc.)
+    raise Exception(f"Error de base de datos al sembrar: {err.msg}")
+  except Exception as e:
+    # Cualquier otro error
+    raise Exception(f"Fallo inesperado en el proceso de seed: {str(e)}")
   finally:
     if conn and conn.is_connected():
         conn.close()

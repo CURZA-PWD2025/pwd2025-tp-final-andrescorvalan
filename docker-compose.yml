@@ -34,16 +34,6 @@ services:
     ports:
       - "5001:5000"
     restart: unless-stopped
-    command: ["./start.sh"]
-#    command: >
-#      bash -c "
-#        /usr/bin/env python db_init.py &&
-#        flask run --host=0.0.0.0
-#      "
-#    command: >
-#      bash -c "pip install -r requirements.txt && 
-#               /usr/bin/env python db_init.py &&
-#               flask run --host=0.0.0.0"
   
   # SERVICIO DE FRONTEND (VUE + NGINX)
   frontend:

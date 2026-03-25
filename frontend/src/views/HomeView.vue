@@ -1,13 +1,14 @@
 <template>
   <div class="home-container">
-   <section class="hero-banner">
-  <div class="hero-overlay"></div> <div class="hero-content">
-    <div class="hero-text">
-      <h1>Happy Animals</h1>
-      <p>Cuidado profesional para quienes más quieres.</p>
-    </div>
-  </div>
-</section>
+    <section class="hero-banner">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>Happy Animals</h1>
+          <p>Cuidado profesional para quienes más quieres.</p>
+        </div>
+      </div>
+    </section>
 
     <h2 class="section-title">Accesos Rápidos</h2>
 
@@ -39,8 +40,9 @@
 
   const accesos = [
     { label: 'Propietarios', route: 'propietarios_list', icon: 'mdi:account-group' },
-    { label: 'Mascotas', route: 'mascotas_list', icon: 'mdi:dog' },
     { label: 'Veterinarios', route: 'veterinarios_list', icon: 'mdi:doctor' },
+    { label: 'Mascotas', route: 'mascotas_list', icon: 'mdi:dog' },
+    { label: 'Atenciones', route: 'atenciones_list', icon: 'mdi:medical-bag' },
     { label: 'Especies', route: 'especies_list', icon: 'mdi:panda' },
     { label: 'Especialidades', route: 'especialidades_list', icon: 'mdi:certificate' },
   ]
@@ -52,7 +54,6 @@
   text-align: left;
 }
 
-/* Banner con el azul de tu menú */
 .hero-banner {
   position: relative;
   background-image: url('../assets/cats-dogs.jpg');
@@ -60,7 +61,7 @@
   color: white;
   border-radius: 0.8rem;
   padding: 4rem 3rem;
-  overflow: hidden; /* Para que el overlay respete los bordes redondeados */
+  overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   margin-bottom: 2.5rem;
   min-height: 350px;
@@ -74,14 +75,13 @@
   left: 0;
   right: 0;
   bottom: 0;
-  /* Degradado de tu azul a transparente para que se vea la foto */
   background: linear-gradient(90deg, rgba(63, 81, 181, 0.9) 0%, rgba(63, 81, 181, 0.4) 100%);
   z-index: 1;
 }
 
 .hero-content {
   position: relative;
-  z-index: 2; /* Por encima del overlay */
+  z-index: 2;
 }
 
 .hero-text h1 {
@@ -109,7 +109,6 @@
   border-left: 5px solid #3f51b5;
 }
 
-/* Grid de Cards */
 .grid-shortcuts {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -117,7 +116,7 @@
 }
 
 .card-shortcut {
-  background-color: #f0f2f5; /* Un gris muy suave parecido a tus tarjetas */
+  background-color: #f0f2f5;
   border: 1px solid #dee2e6;
   border-radius: 0.6rem;
   padding: 1.2rem;
@@ -172,7 +171,6 @@
   opacity: 1;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   .hero-banner {
     padding: 2rem;

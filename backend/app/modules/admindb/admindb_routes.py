@@ -8,22 +8,43 @@ admindb_bp = Blueprint('admin_db', __name__)
 def setup():
     try:
         service.run_setup()
-        return jsonify({"message": "Estructura creada con éxito"}), 200
+        return jsonify({
+            "estado": "ok", 
+            "mensaje": "Base de Datos creada con éxito."
+            }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"AdminDB Setup Exception: {e}")
+        return jsonify({
+            "estado": "exception", 
+            "mensaje": "Error crítico al crear la base de datos."
+            }), 500
 
 @admindb_bp.route('/db/seed', methods=['POST'])
 def seed():
     try:
         service.run_seed()
-        return jsonify({"message": "Datos cargados con éxito"}), 200
+        return jsonify({
+                "estado": "ok", 
+                "mensaje": "Estructura creada y datos cargados con éxito."
+            }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"AdminDB Seed Exception: {e}")
+        return jsonify({
+            "estado": "exception", 
+            "mensaje": "Error crítico al cargar datos de ejemplo."
+        }), 500
 
 @admindb_bp.route('/db/clear', methods=['POST'])
 def clear():
     try:
         service.run_clear()
-        return jsonify({"message": "Base de datos limpia"}), 200
+        return jsonify({
+            "estado": "ok", 
+            "mensaje": "Base de datos eliminada con éxito."
+        }), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"AdminDB Clear Exception: {e}")
+        return jsonify({
+            "estado": "exception", 
+            "mensaje": "Error crítico al intentar eliminar la base de datos."
+        }), 500

@@ -1,16 +1,18 @@
 <script setup lang="ts">
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { onMounted } from 'vue'
 
-  const route = useRouter()
+  const router = useRouter()
+  const route = useRoute()
 
   onMounted(() => {
-    route.push({ name: 'propietarios_list' })
+    if (route.name === 'propietarios') {
+      router.push({ name: 'propietarios_list' })
+    } 
   })
 </script>
 
 <template>
-  <h1>Administración de Propietarios</h1>
   <router-view />
 </template>
 

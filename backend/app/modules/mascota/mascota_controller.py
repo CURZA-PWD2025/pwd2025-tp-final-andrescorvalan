@@ -1,5 +1,5 @@
 import datetime
-from .mascota_model import MascotaModel
+from .mascota_model import MascotaModel, ModelException
 from ..propietario.propietario_model import PropietarioModel
 from ..especie.especie_model import EspecieModel
 
@@ -11,174 +11,205 @@ class MascotaController:
     # Método estático para obtener todas los Mascotas.
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def get_all() -> list[dict] | None:
-        return MascotaModel.get_all()
+    def get_all() -> list[dict]:
+        try:
+            mascotas = MascotaModel.get_all()
+            cantidad = len(mascotas)
+            if cantidad > 0:
+                msg = f"Se obtuvieron {cantidad} mascotas con éxito."
+            else:
+                msg = "No se encontraron mascotas registradas."
+            return {
+                'estado': 'ok',
+                'mensaje': msg,
+                'datos': mascotas
+            }
+        except ModelException as e:
+            return {
+                'estado': 'exception', 
+                'mensaje': f'{str(e)}'
+            }
     #--------------------------------------------------------------------------------------------------------
     # Método estático para obtener una Mascota.
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def get_one(id: int) -> dict | None:
-        return MascotaModel.get_one(id)
+    def get_one(id: int) -> dict:
+        try:
+            mascota = MascotaModel.get_one(id)
+            if mascota:
+                return {
+                    'estado': 'ok',
+                    'datos': mascota
+                }
+            else:
+                return {
+                    'estado': 'not_found',
+                    'mensaje': f"No se encontro la mascota con ID {id} en la base de datos."
+                }
+        except ModelException as e:
+            return {
+                'estado': 'exception', 
+                'mensaje': f'{str(e)}'
+            }
     #--------------------------------------------------------------------------------------------------------
     # Métodos estático para verificar la integridad y formato de los datos.
     # Retorna: - {} si los datos son correctos.
     #          - dict con el error si los datos son incorrectos o incompletos.
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def verificar_data_comun(data: dict) -> dict:
+    def verificar_data(data: dict) -> dict:
         # Verificar existencia de nombre y fecha de nacimiento.
-        print(data)
-        for campo in ['nombre', 'fecha_nac']:
+        for campo in ['nombre', 'fecha_nac', 'sexo']:
             if campo not in data or data[campo] is None or not str(data[campo]).strip():
                 return {
                     'estado': 'error', 
-                    'mensaje': f'Mascota: Falta el campo obligatorio: {campo}.'
+                    'mensaje': f'Falta el campo obligatorio: {campo}.'
                 }
         # Verificar propietario_id y especie_id.
         for campo in ['propietario_id', 'especie_id']:
             if campo not in data:
                 return {
                     "estado": "error",
-                    "mensaje": f"Mascota: Falta el campo obligatorio {campo}."
+                    "mensaje": f"Falta el campo obligatorio {campo}."
                 }
             if not isinstance(data[campo], int) or data[campo] <= 0:
                 return {
                     "estado": "error",
-                    "mensaje": f"Mascota: {campo} debe ser entero positivo."
+                    "mensaje": f"El {campo} debe ser un entero positivo."
                 }
        # Verificar la fecha.
         try:
             datetime.datetime.strptime(data["fecha_nac"], "%Y-%m-%d")
-        except:
+        except ValueError:
             return {
                 'estado': 'error',
-                'mensaje': 'Mascota: La fecha de nacimiento debe tener formato YYYY-MM-DD.'
+                'mensaje': 'La fecha de nacimiento no es válida o tiene un formato incorrecto.'
             }
-        # Chequear existencia del propietario y obtener su data.
-        propietario_data = PropietarioModel.get_one(data["propietario_id"])
-        if propietario_data == {}:
-            return {
-                'estado': 'error',
-                'mensaje': 'Mascota: El propietario especificado no existe.'
-            }
-        # Chequear existencia de la especie y obtener su data.
-        especie_data = EspecieModel.get_one(data['especie_id'])
-        if especie_data == {}:
-            return {
-                'estado': 'error',
-                'mensaje': 'Mascota: La especie especificada no existe.'
-            }
-        
-        # Si se llega aca, todo en orden.
-        # Crear data completo.
-        data_completo = data.copy()
-        data_completo["propietario"] = propietario_data
-        data_completo["especie"] = especie_data
-        del data_completo["propietario_id"]
-        del data_completo["especie_id"]
-        return {
-            'estado': 'ok',
-            'data_completo': data_completo
-        }
-
-    @staticmethod  
-    def verificar_data_create(data: dict) -> dict:
-        return MascotaController.verificar_data_comun(data)
-    
-    @staticmethod  
-    def verificar_data_update(data: dict) -> dict:
-        print("Verificando data update:", data)
-        # Verificar ID obligatorio.
-        if not isinstance(data.get("id"), int) or data.get("id") <= 0:
-            return {
-                'estado': 'error',
-                'mensaje': 'Mascota: El ID es obligatorio para actualizar y debe ser un entero positivo.'
-            }
-        # Chequear existencia de la mascota.
-        if MascotaModel.get_one(data["id"]) == {}:
-            return {
-                'estado': 'not_found',
-                'mensaje': 'Mascota: La mascota a actualizar no existe.'
-            }
-        return MascotaController.verificar_data_comun(data)
+        return {}
     #--------------------------------------------------------------------------------------------------------
-    # Método estático para crear un Mascota.
+    # Método estático para crear una Mascota.
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def create(data: dict) -> dict | None:
+    def create(data: dict) -> dict:
         # Verficar data.
-        estado = MascotaController.verificar_data_create(data)
-        if estado['estado'] != 'ok':
-            return estado # Devuelve el error de validación.
-        # Obtener el data completo, setear id=0, y un objeto de MascotaModel (completo, con Propietario y Especie).
-        data_create = estado['data_completo']
-        data_create['id'] = 0
-        mascota = MascotaModel.deserializar(data_create)
-        # Crear en la BD.
-        result = mascota.create()
-        if result is True: 
-            return {
-                'estado': 'ok', 
-                'mensaje': 'Mascota: Creación exitosa',
-                'objeto': mascota.serializar()
-            }
-        if result is False:
+        error = MascotaController.verificar_data(data)
+        if error:
+            return error # Devuelve el error de validación.
+        try:
+            mascota = MascotaModel(
+                id = 0,
+                nombre = data['nombre'],
+                fecha_nac = data['fecha_nac'],
+                sexo = data['sexo'],
+                propietario = PropietarioModel(id = int(data['propietario_id'])),
+                especie = EspecieModel(id = int(data['especie_id']))
+            )
+            if mascota.create():
+                data_completo = mascota.serializar()
+                data_completo["propietario"] = PropietarioModel.get_one(mascota.propietario.id)
+                data_completo["especie"] = EspecieModel.get_one(mascota.especie.id)
+                return {
+                    'estado': 'ok',
+                    'mensaje': 'Especie creada con éxito.',
+                    'objeto': data_completo
+                }
+            #else
             return {
                 'estado': 'error', 
-                'mensaje': 'Mascota: Error al intentar crear.'
+                'mensaje': 'No se pudo crear la nueva mascota en la base de datos. Intente más tarde.'
             }
-        return None # Excepción al intentar insertar en la BD.
+        except ValueError as e: 
+            return {
+                'estado': 'error',
+                'mensaje': f'{str(e)} Verifique los datos e intente más tarde.'
+            }
+        except ModelException as e:
+            return {
+                'estado': 'exception', 
+                'mensaje': f'{str(e)}'
+            }
     #--------------------------------------------------------------------------------------------------------
     # Método estático para actualizar un Mascota.
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def update(data: dict) -> dict | None:
-        # Verificar data.
-        estado = MascotaController.verificar_data_update(data)
-        if estado['estado'] != 'ok':
-            return estado # Devuelve el error de validación.
-        # Obtener el data completo y un objeto de MascotaModel (completo, con Propietario y Especie).
-        data_update = estado['data_completo']
-        mascota = MascotaModel.deserializar(data_update)
-        print(mascota)
-        # Actualizar en la BD.
-        result = mascota.update()
-        if result is None:
-            return None # Excepción al intentar actualizar en la BD.
-        if result is True:
+    def update(data: dict) -> dict:
+        # Validar el id (obligatorio para actualizar).
+        if data.get('id') is None or not isinstance(data.get('id'), int) or data.get('id') <= 0:
             return {
-                'estado': 'ok', 
-                'mensaje': 'Mascota: Actualización exitosa.',
+                'estado': 'error', 
+                'mensaje': 'El ID de la mascota es inválido o no fue enviado.'
+            }
+        # Verficar data.
+        error = MascotaController.verificar_data(data)
+        if error:
+            return error # Devuelve el error de validación.
+        # Actualizar
+        try:
+            mascota = MascotaModel(
+                id = data['id'],
+                nombre = data['nombre'],
+                fecha_nac = data['fecha_nac'],
+                sexo = data['sexo'],
+                propietario = PropietarioModel(id = int(data['propietario_id'])),
+                especie = EspecieModel(id = int(data['especie_id']))
+            )
+            if mascota.update():
+                data_completo = mascota.serializar()
+                data_completo["propietario"] = PropietarioModel.get_one(mascota.propietario.id)
+                data_completo["especie"] = EspecieModel.get_one(mascota.especie.id)
+                return {
+                    
+                    'estado': 'ok', 
+                    'mensaje': 'Mascota actualizada con éxito.',
+                    'objeto': data_completo
+                }
+            # Si la ejecucion llega aqui es porque:
+            # a) no existe el registro.
+            # b) no hubo cambios.
+            existe = MascotaModel.get_one(mascota.id)
+            if not existe:
+                return {
+                    'estado': 'not_found',
+                    'mensaje': 'La mascota ya no existe en la base de datos.'
+                }
+            return {
+                'estado': 'ok', # Se trata como éxito para el usuario
+                'mensaje': 'No se detectaron cambios, los datos están actualizados.',
                 'objeto': mascota.serializar()
             }
-        # Si la ejecucion llega aqui es porque result == False: UPDATE no afectó filas por:
-        # a) no existe el registro.
-        # b) no hubo cambios.
-        reg = MascotaModel.get_one(data['id'])
-        if reg == {}:   # no existe.
+        except ValueError as e: 
             return {
-                'estado': 'not_found',
-                'mensaje': 'Mascota: No existe la mascota que se quiere actualizar.'
+                'estado': 'error',
+                'mensaje': f'{str(e)} Verifique los datos e intente más tarde.'
             }
-        #else: no se cambio nada.
-        return {
-            'estado': 'ok',
-            'mensaje': 'Mascota: No hubo cambios (los datos enviados son iguales a los existentes).'
-        }
+        except ModelException as e:
+            return {
+                'estado': 'exception', 
+                'mensaje': f'{str(e)}'
+            } 
     #--------------------------------------------------------------------------------------------------------
     # Método estático para eliminar un Mascota.
     #--------------------------------------------------------------------------------------------------------  
     @staticmethod
-    def delete(id: int) -> dict | None:
-        result = MascotaModel.delete(id)
-        if result is True:
-            return {
-                'estado': 'ok',
-                'mensaje': 'Mascota: Eliminación exitosa.'
-            }
-        if result is False:
+    def delete(id: int) -> dict:
+        try:
+            if MascotaModel.delete(id):
+                return {
+                    'estado': 'ok',
+                    'mensaje': f'La mascota con ID {id} ha sido eliminada con éxito.'
+                }
+            #else           
             return {
                 'estado': 'not_found',
-                'mensaje': 'Mascota: No existe el registro.'
+                'mensaje': f'La mascota con ID {id} ya no existe en la base de datos.'
             }
-        return None # Excepción al intentar eliminar en la BD.
+        except ValueError as e: 
+            return {
+                'estado': 'error',
+                'mensaje': f'{str(e)}'
+            }
+        except ModelException as e:
+            return {
+                'estado': 'exception', 
+                'mensaje': f'{str(e)}'
+            }

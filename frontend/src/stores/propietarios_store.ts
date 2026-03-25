@@ -1,7 +1,7 @@
-import type { Propietario } from '@/interface/Propietario'
+import type { Propietario } from '@/interface/propietario'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import ApiService from '@/services/ApiService'
+import ApiService from '@/services/api_service'
 
 const url = 'propietarios/'
 const defaultPropietario: Propietario = {
@@ -19,88 +19,95 @@ const usePropietariosStore = defineStore('propietarios', () => {
 
   async function buscar_propietario(id: number) {
     const busqueda = propietarios.value.find((propietario) => propietario.id === id)
-    if (busqueda) 
+    if (busqueda) {
       propietario.value = { ...busqueda }
-    else
-      try {
-        await getOne(id)
-        return propietario.value
-      } catch (error) {
-        throw error 
+      return { 
+        estado:'ok', 
+        objeto: propietario.value
       }
-    return propietario.value
+    }
+    try {
+      return await getOne(id)
+    } catch (error) {
+      throw error 
+    }
   }
+
   async function getAll() {
     try {
-      // Solicitar el listado de propietarios.
-      propietarios.value = await ApiService.getAll(url) || []
+      const respuesta = await ApiService.getAll(url)
+      propietarios.value = respuesta.datos || []
+      return respuesta
     } catch (error: any) {
       propietarios.value = []
       throw error
     }
   }
+
   async function getOne(id: number) {
     try {
       const respuesta = await ApiService.getOne(url, id)
-      if (respuesta && respuesta.id)
-        // Respuesta tiene el propietario.
-        propietario.value = respuesta 
-      else
-        propietario.value = {...defaultPropietario}
+      if (!respuesta.datos) 
+        throw new Error('No se encontraron datos');
+      else {
+        propietario.value = respuesta.datos
+        return respuesta
+      }
     } catch (error: any) {
-      propietario.value = {...defaultPropietario}
+      propietario.value = { ...defaultPropietario }
       throw error
     }
   }
+
   async function create(obj_propietario: Propietario) {
     try {
       const respuesta = await ApiService.create(url, obj_propietario)
-      if (respuesta && respuesta.objeto) {
-        const nuevoPropietario = respuesta.objeto
-        propietarios.value.push({ ...nuevoPropietario })
-        propietarios.value = { ...nuevoPropietario }
-        return nuevoPropietario
-      } 
-      throw new Error('Respuesta de creación inesperada del servidor (cuerpo malformado).')
+      const nuevoPropietario = respuesta.objeto
+      propietarios.value.push({ ...nuevoPropietario })
+      propietario.value = { ...nuevoPropietario }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+  
   async function update(obj_propietario: Propietario) {
     if (!obj_propietario.id)
-      throw new Error('Propietario: No se puede actualizar un propietario sin ID.')
+      throw { 
+        estado: 'error', 
+        mensaje: 'Propietario: No se puede actualizar (ID no válido).' 
+      }
     try {
       const respuesta = await ApiService.update(url, obj_propietario.id, obj_propietario)
-      if (respuesta && respuesta.estado === 'ok' && respuesta.objeto) {
-        const nuevoPropietario = respuesta.objeto
-        const index = propietarios.value.findIndex(prop => 
-          prop.id === obj_propietario.id)
-        if (index !== -1) {
-          propietarios.value[index] = { ...nuevoPropietario }
-        }
-        propietario.value = { ...nuevoPropietario }
-        return nuevoPropietario
+      const nuevoPropietario = respuesta.objeto
+      const index = propietarios.value.findIndex(prop => prop.id === obj_propietario.id)
+      if (index !== -1) {
+        propietarios.value[index] = { ...nuevoPropietario }
       }
-      throw new Error(respuesta.mensaje || 'Error al actualizar.')
+      propietario.value = { ...nuevoPropietario }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+
   async function destroy(id: number) {
     try {
-      await ApiService.destroy(url, id)
-      propietarios.value = propietarios.value.filter(prop =>
-        prop.id !== id);    
-      propietario.value = {...defaultPropietario}
-      return true
+      const respuesta = await ApiService.destroy(url, id)
+      propietarios.value = propietarios.value.filter(prop => prop.id !== id);    
+      propietario.value = { ...defaultPropietario }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+
   function reset() {
     propietarios.value = []
-    propietario.value = {...defaultPropietario}
+    propietario.value = { ...defaultPropietario }
   }
+  
   return { reset, defaultPropietario, propietarios, propietario, buscar_propietario, getAll, getOne, create, update, destroy }
 })
+
 export default usePropietariosStore

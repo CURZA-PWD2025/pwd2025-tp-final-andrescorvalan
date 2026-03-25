@@ -1,4 +1,5 @@
 import mysql.connector
+from .erroresBD import DBException,DBErrorData
 import os
 from dotenv import load_dotenv
 
@@ -24,61 +25,63 @@ class OperarBD:
                 autocommit = True,            
             )
             return conn
-        except mysql.connector.Error as una_excepccion:
-            print(f'Base de Datos: Ocurrió una excepción al intentar conectarse: {una_excepccion}')
-            raise
-
+        except mysql.connector.Error as e:
+            raise DBException(f'DB: Exception en OperarBD.get_connect. {e}')
     #--------------------------------------------------------------------------------------------------------
     # Método estático para obtener resgistros, se debe usar con SELECT en el parametro sql
-    # Retorna: - Un conjunto de registros.
-    #          - None si hubo alguna excepción de la BD.
+    # Retorna un conjunto de registros
+    # Lanza mysql.connector.Error si ocurre una falla en la base de datos
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def obtenerReg(sql: str, params: tuple=()) -> list[dict] | None:
+    def obtenerReg(sql: str, params: tuple=()) -> list[dict]:
         conexion = None
         try:
             conexion = OperarBD.get_connect()
             with conexion.cursor(dictionary=True) as un_cursor:
                 un_cursor.execute(sql,params)
                 return un_cursor.fetchall()
-        except mysql.connector.Error as una_excepccion:
-            print(f'Base de Datos: Ocurrió una excepción al intentar obtener datos {una_excepccion}')
-            return None
+        except mysql.connector.Error as e:
+            print(f'DEBUG - MySQL: Exception en OperarBD.obtenerReg. {e}')
+            raise DBException(str(e))
         finally:
             if conexion and conexion.is_connected():
                 conexion.close()
-
     #--------------------------------------------------------------------------------------------------------
-    # Método estático para modificar resgistros, se debe usar con INSERT, UPDATE o DELETE en el parametro sql
-    # Retorna: 
-    # - None si se detecto una excepción.
-    # - Un entero:
-    #      a) si es un INSERT con PK autoincrement, devuelve el nuevo Id.
-    #      b) sino devuelve el numero de filas afectadas (puede ser 0).
+    # Método estático para modificar registros, se debe usar con INSERT, UPDATE o DELETE en el parametro sql
+    # - Lanza mysql.connector.Error si ocurre una falla en la base de datos
+    # - Retorna un entero:
+    #      a) si es un INSERT con PK autoincrement, devuelve el nuevo Id
+    #      b) sino devuelve el numero de filas afectadas (puede ser 0)
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def modifBD(sql: str, params: tuple=()) -> int | None:
+    def modifBD(sql: str, params: tuple=()) -> int:
         conexion = None
         try:
             conexion = OperarBD.get_connect()
             with conexion.cursor(dictionary=True) as un_cursor:
                 un_cursor.execute(sql, params)
                 if sql.strip().upper().startswith("INSERT") and un_cursor.lastrowid:
-                    # Para un INSERT en una tabla con clave primaria autoincrement.
+                    # Para un INSERT en una tabla con clave primaria autoincrement
                     # Devuelve el ID generado
                     return un_cursor.lastrowid
-                
                 # Para un INSERT en una tabla con clave primaria NO autoincrement, o un UPDATE o DELETE, 
                 # devuelve el número de filas afectadas (puede ser 0 si no hubo cambios (UPDATE) o no se 
                 # encontró el registro (UPDATE/DELETE))
                 return un_cursor.rowcount 
-        except mysql.connector.Error as una_excepccion:
-            print(f'Base de Datos: Ocurrió una excepción al intentar manipular datos: {una_excepccion}')
-            return None
+        except mysql.connector.Error as e:
+            print(f'DEBUG - MySQL: Exception en OperarBD.modifBD. {e}')
+            if e.errno == 1062:
+                msg_original = str(e.msg)
+                detalle = msg_original.replace("Duplicate entry", "Dato duplicado").split(" for key")[0]
+                raise DBErrorData(f'{detalle}. Ya existe un registro con este dato, que debe ser único.')
+            if e.errno == 1451:
+                raise DBErrorData("Este registro está siendo usado por otras entidades de la base de datos.")
+            if e.errno == 1452:
+                raise DBErrorData("Error de referencia: se quiere asociar una entidad que ya no existe en la base de datos.")        
+            raise DBException(f'DB: Exception en OperarBD.modifBD(). {e}')
         finally:
             if conexion and conexion.is_connected():
                 conexion.close()
-
 #------------------------------------------------------------------------------------------------------------------------
 # Clase para realizar operaciones sobre la BD que NO sean unicas, sino varias en una transaccion (autocommit=False)
 #------------------------------------------------------------------------------------------------------------------------
@@ -90,7 +93,6 @@ class TransaccionBD:
 
     def get_nuevo_id(self):
         return self.nuevo_id
-    
     #--------------------------------------------------------------------------------------------------------
     # Método para inicializar una transacción y su conexión
     #--------------------------------------------------------------------------------------------------------
@@ -108,36 +110,30 @@ class TransaccionBD:
             )
             self.cursor = self.conexion.cursor(dictionary=True)
             self.nuevo_id = 0
-        except mysql.connector.Error as una_excepccion:
-            raise RuntimeError(f'Base de Datos: Ocurrió una excepción al intentar iniciar una transacción: {una_excepccion}') 
+        except mysql.connector.Error as e:
+            raise DBException(f'DB: Exception en TransaccionBD.iniciar_transaccion. {e}')
     #--------------------------------------------------------------------------------------------------------
     # Metodo para hacer un commit
     #--------------------------------------------------------------------------------------------------------          
-    def confirmar_transaccion(self):
+    def confirmar_transaccion(self) -> bool:
         if not (self.conexion and self.conexion.is_connected()):
-            print("Base de Datos: No hay una transacción activa para realizar commit.")
-            return None
+            raise DBException(f'DB: Exception en TransaccionBD.confirmar_transaccion (sin transaccion). {e}')
         try:
             self.conexion.commit()
             return True
-        except mysql.connector.Error as una_excepcion:
-            print(f"Base de Datos: Excepción al hacer commit: {una_excepcion}")
-            return None
-
+        except mysql.connector.Error as e:
+            raise DBException(f'DB: Exception en TransaccionBD.confirmar_transaccion (commit). {e}')
     #--------------------------------------------------------------------------------------------------------
     # Metodo para hacer un rollback
     #--------------------------------------------------------------------------------------------------------
-    def revertir_transaccion(self):
+    def revertir_transaccion(self) -> bool:
         if not (self.conexion and self.conexion.is_connected()):
-            print("Base de Datos: No hay una transacción activa para realizar rollback.")
-            return None
+            raise DBException(f'DB: Exception en TransaccionBD.revertir_transaccion (sin transaccion). {e}')
         try:
             self.conexion.rollback()
             return True
-        except mysql.connector.Error as una_excepcion:
-            print(f"Base de Datos: Excepción al hacer rollback: {una_excepcion}")
-            return None
-        
+        except mysql.connector.Error as e:
+            raise DBException(f'DB: Exception en TransaccionBD.revertir_transaccion (rollback). {e}')
     #--------------------------------------------------------------------------------------------------------
     # Metodo para finalizar la transaccion, liberando los recursos
     #--------------------------------------------------------------------------------------------------------
@@ -145,46 +141,41 @@ class TransaccionBD:
         if self.cursor:
             try:
                 self.cursor.close()
-            except mysql.connector.Error as una_excepccion:
-                print(f"Base de Datos: Excepción al cerrar el cursor: {una_excepccion}")
+            except mysql.connector.Error as e:
+                raise DBException(f'DB: Exception en TransaccionBD.finalizar_transaccion (cursor.close). {e}')
             finally:
                 self.cursor = None
         if self.conexion:
             try:
                 if self.conexion.is_connected():
                     self.conexion.close() 
-            except mysql.connector.Error as una_excepccion:
-                print(f"Base de Datos: Excepción al cerrar la conexión: {una_excepccion}")
+            except mysql.connector.Error as e:
+                raise DBException(f'DB: Exception en TransaccionBD.finalizar_transaccion (conexion.close). {e}')
             finally: 
                 self.conexion = None
-    
     #--------------------------------------------------------------------------------------------------------
     # Metodo para obtener datos de la BD (SELECT)
+    # Retorna un conjunto de registros
+    # Lanza mysql.connector.Error si ocurre una falla en la base de datos
     #--------------------------------------------------------------------------------------------------------
-    def obtenerReg(self, sql: str, params: tuple=()) -> list[dict] | None:
+    def obtenerReg(self, sql: str, params: tuple=()) -> list[dict]:
         if not (self.conexion and self.conexion.is_connected()):
-            print("Base de Datos: No hay una transacción activa para obtener registros.")
-            return None
-           
+            raise DBException(f'DB: Exception en TransaccionBD.obtenerReg (sin transaccion). {e}')
         try:
             self.cursor.execute(sql, params)
             return self.cursor.fetchall()
-        except mysql.connector.Error as una_excepccion:
-            print(f'Base de Datos: Excepción al intentar obtener datos {una_excepccion}')
-            return None
-
+        except mysql.connector.Error as e:
+            raise DBException(f'DB: Exception en TransaccionBD.obtenerReg. {e}')
     #--------------------------------------------------------------------------------------------------------
-    # Metodo para modificar datos de la BD (INSERT,UPDATE,DELETE)
-    # Retorna: 
-    # - None si se detecto una excepcion
-    # - Un entero si una operacion INSERT, UPDATE o DELETE:
-    #      a) si es un INSERT con PK autoincrement, devuelve el nuevo Id.
+    # Metodo para modificar datos de la BD (INSERT,UPDATE,DELETE) 
+    # - Lanza mysql.connector.Error si ocurre una falla en la base de datos
+    # - Retorna un entero si una operacion INSERT, UPDATE o DELETE:
+    #      a) si es un INSERT con PK autoincrement, devuelve el nuevo Id
     #      b) sino el numero de filas afectadas (puede ser 0)
     #--------------------------------------------------------------------------------------------------------
-    def operacionBD(self, sql: str, params: tuple=()) -> int | None:
+    def operacionBD(self, sql: str, params: tuple=()) -> int:
         if not (self.conexion and self.conexion.is_connected()):
-            print("Base de Datos: No hay una transacción activa para poder manipular datos.")
-            return None
+            raise DBException(f'DB: Exception en TransaccionBD.obtenerReg (sin transaccion).')
         try:
             self.cursor.execute(sql, params)
             if sql.strip().upper().startswith("INSERT") and self.cursor.lastrowid:
@@ -196,7 +187,14 @@ class TransaccionBD:
             # Para INSERT de una tabla con clave primaria NO autoincrement.
             # Para UPDATE y DELETE, devolve el número de filas afectadas
             # Puede ser 0 si no hubo cambios (UPDATE) o no se encontró el registro (DELETE)
-            return self.cursor.rowcount 
-        except mysql.connector.Error as una_excepccion:
-            print(f'Base de Datos: Excepción al intentar manipular datos: {una_excepccion}')
-            return None
+            return self.cursor.rowcount
+        except mysql.connector.Error as e:
+            if e.errno == 1062:
+                msg_original = str(e.msg)
+                detalle = msg_original.replace("Duplicate entry", "Dato duplicado").split(" for key")[0]
+                raise DBErrorData(f'{detalle}. Ya existe un registro con este dato, que debe ser único.')
+            if e.errno == 1451:
+                raise DBErrorData("Este registro está siendo usado por otras entidades de la base de datos.")
+            if e.errno == 1452:
+                raise DBErrorData("Error de referencia: se quiere asociar una entidad que ya no existe en la base de datos.")        
+            raise DBException(f'DB: Exception en TransaccionBD.operacionBD(). {e}')

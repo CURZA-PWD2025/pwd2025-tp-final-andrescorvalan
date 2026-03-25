@@ -1,17 +1,20 @@
 <script setup lang="ts">
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { onMounted } from 'vue'
 
   const router = useRouter()
+  const route = useRoute()
 
   onMounted(() => {
-    router.push({ name: 'especies_list' })
+    if (route.name === 'especies') {
+      router.push({ name: 'especies_list' })
+    } 
   })
 </script>
 
 <template>
-  <h1>Administración de Especies</h1>
-  <router-view/>
+  <router-view />
 </template>
+
 
 <style scoped></style>

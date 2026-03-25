@@ -1,12 +1,20 @@
 from ...database.accesoBD import OperarBD
+from ...database.erroresBD import DBErrorData, DBException
+
 from ...database.accesoBD import TransaccionBD
 from ..especialidad.especialidad_model import EspecialidadModel
+
+class ModelException(Exception):
+    # Errores ya procesados por el Model.
+    # Se pueden enviar al frontend.
+    pass
 
 #------------------------------------------------------------------------------------------------------------------------
 # Clase Modelo para la entidad Veterinario
 #------------------------------------------------------------------------------------------------------------------------
 
 class VeterinarioModel:
+    PREFIX = 'Base de Datos (Veterinario): '
     #--------------------------------------------------------------------------------------------------------
     # Constructor
     #--------------------------------------------------------------------------------------------------------
@@ -32,7 +40,6 @@ class VeterinarioModel:
             "email" : self.email,
             "especialidades" : [esp.serializar() for esp in self.especialidades]
         }
-
     @staticmethod
     def deserializar(data: dict) -> 'VeterinarioModel':        
         return VeterinarioModel(
@@ -48,21 +55,55 @@ class VeterinarioModel:
     # Método estático para obtener todos los Veterinarios
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def get_all() -> list[dict] | None:
-        veterinarios_bd = OperarBD.obtenerReg(
-            "SELECT * "
-            "FROM VETERINARIOS"
-        )
-        if veterinarios_bd is None:
-            return None
-        
-        listado = []
-        for veterinario_data in veterinarios_bd:
+    def get_all() -> list[dict]:
+        try:
+            registros_vet = OperarBD.obtenerReg(
+                "SELECT id, nombre, apellido, matricula, telefono, email "
+                "FROM VETERINARIOS"
+            )
+            listado = []
+            for veterinario_data in registros_vet:
+                registros_esp = OperarBD.obtenerReg(
+                    "SELECT especialidad_id "
+                    "FROM VETERINARIO_ESPECIALIDAD "
+                    "WHERE veterinario_id=%s",
+                    (veterinario_data['id'],)
+                ) or []
+                especialidades = []
+                for reg in registros_esp:
+                    esp = EspecialidadModel.get_one(reg['especialidad_id'])
+                    if esp:
+                        especialidades.append(esp)
+                veterinario_data['especialidades'] = especialidades
+                listado.append(veterinario_data)
+            return listado
+        except DBException:
+            print(f"DEBUG - {VeterinarioModel.PREFIX} (get_all):")
+            raise ModelException(
+                "No se pudo obtener el listado de veterinarios. El Sistema " \
+                "Gestor de Base de Datos esta fuera de servicio o la BD/Tabla no existe."
+            )    #--------------------------------------------------------------------------------------------------------
+    # Método estático para obtener un Veterinario por Id
+    # Retorna:  - un diccionario con los datos si encontró el registro
+    #           - {} si no encontró el registro
+    #--------------------------------------------------------------------------------------------------------
+    @staticmethod
+    def get_one(id: int) -> dict:
+        try:
+            registros = OperarBD.obtenerReg(
+                "SELECT id, nombre, apellido, matricula, telefono, email "
+                "FROM VETERINARIOS "
+                "WHERE id=%s",
+                (id,)
+            )
+            if not registros:
+                return {}
+            veterinario_data = registros[0]
             registros_esp = OperarBD.obtenerReg(
                 "SELECT especialidad_id "
                 "FROM VETERINARIO_ESPECIALIDAD "
                 "WHERE veterinario_id=%s",
-                (veterinario_data['id'],)
+                (id,)
             ) or []
             especialidades = []
             for reg in registros_esp:
@@ -70,87 +111,53 @@ class VeterinarioModel:
                 if esp:
                     especialidades.append(esp)
             veterinario_data['especialidades'] = especialidades
-            listado.append(veterinario_data)
-                          
-        return listado
-    #--------------------------------------------------------------------------------------------------------
-    # Método estático para obtener un Veterinario por Id
-    # Retorna:  - un diccionario con los datos si encontró el registro
-    #           - {} si no encontró el registro
-    #           - None si hubo una excepción
-    #--------------------------------------------------------------------------------------------------------
-    @staticmethod
-    def get_one(id: int) -> dict | None:
-        registros = OperarBD.obtenerReg(
-            "SELECT * "
-            "FROM VETERINARIOS "
-            "WHERE id=%s",
-            (id,)
-        )
-        if registros is None:
-            return None
-        if not registros:
-            return {}
 
-        veterinario_data = registros[0]
-        registros_esp = OperarBD.obtenerReg(
-            "SELECT especialidad_id "
-            "FROM VETERINARIO_ESPECIALIDAD "
-            "WHERE veterinario_id=%s",
-            (id,)
-        ) or []
-
-        especialidades = []
-        for reg in registros_esp:
-            esp = EspecialidadModel.get_one(reg['especialidad_id'])
-            if esp:
-                especialidades.append(esp)
-        veterinario_data['especialidades'] = especialidades
-
-        return veterinario_data
+            return veterinario_data
+        except DBException:
+            print(f"DEBUG - {VeterinarioModel.PREFIX} (get_one):")
+            raise ModelException(
+                "No se pudo obtener el veterinario. El Sistema " \
+                "Gestor de Base de Datos esta fuera de servicio o la BD/Tabla no existe."
+            )    
     #--------------------------------------------------------------------------------------------------------
     # Método para crear un Veterinario
     # Retorna: - True si se inserto correctamente
     #          - False si no se pudo insertar
-    #          - None si hubo una excepción
     #--------------------------------------------------------------------------------------------------------
-    def create(self) -> bool | None:
+    def create(self) -> bool:
         #se usa una transaccion porque se deben realizar varias escrituras (todas o ninguna)
         transaccion = None
         try:
             transaccion = TransaccionBD()
             transaccion.iniciar_transaccion()
             #Insertar veterinario
-            resultado_vet = transaccion.operacionBD(
+            result_vet = transaccion.operacionBD(
                 "INSERT "
                 "INTO VETERINARIOS (nombre, apellido, matricula, telefono, email) "
                 "VALUES (%s, %s, %s, %s, %s)",
                 (self.nombre, self.apellido, self.matricula, self.telefono, self.email)
             )
-            if resultado_vet is None or resultado_vet == 0:
+            if result_vet > 0:
+                self.id = transaccion.get_nuevo_id()
+            else:
                 transaccion.revertir_transaccion()
-                return False
-            
-            self.id = transaccion.get_nuevo_id()
+                return False 
             #Insertar las especialidades del veterinario
             for una_esp in self.especialidades:
-                resultado_esp = transaccion.operacionBD(
+                transaccion.operacionBD(
                     "INSERT "
                     "INTO VETERINARIO_ESPECIALIDAD (veterinario_id, especialidad_id) "
                     "VALUES (%s, %s)",
-                    (self.id, una_esp.id))
-                if resultado_esp is None:
-                    transaccion.revertir_transaccion()
-                    return False
-            
+                    (self.id, una_esp.id)
+                )
             #Se inserto correctamente
             transaccion.confirmar_transaccion()
             return True
-        except Exception as err:
-            if transaccion:
-                transaccion.revertir_transaccion()
-            #print(f"Error al crear el artículo: {err}")
-            return None
+        except DBErrorData as e:
+            raise ValueError(f"No se pudo crear el veterinario: {e}")
+        except DBException:
+            print(f"DEBUG - {VeterinarioModel.PREFIX} (create):")
+            raise ModelException('No se pudo crear el veterinario en la base de datos.')
         finally:
             if transaccion:
                 transaccion.finalizar_transaccion()
@@ -159,54 +166,41 @@ class VeterinarioModel:
     # Retorna: - True si se modificó correctamente (puede ser 0 si no hubo cambios)
     #          - None si hubo una excepción
     #--------------------------------------------------------------------------------------------------------
-    def update(self) -> bool | None:       
+    def update(self) -> bool:       
         transaccion = None
         try:
             transaccion = TransaccionBD()
             transaccion.iniciar_transaccion()
             #actualizar el veterinario
-            resultado_vet = transaccion.operacionBD(
+            transaccion.operacionBD(
                 "UPDATE VETERINARIOS "
                 "SET nombre=%s, apellido=%s, matricula=%s, telefono=%s, email=%s "
                 "WHERE id=%s",
-                (self.nombre, self.apellido, self.matricula, self.telefono, self.email, self.id,)
+                (self.nombre, self.apellido, self.matricula, self.telefono, self.email, self.id)
             )
-            if resultado_vet is None:
-                transaccion.revertir_transaccion()
-                return False
-
             #Eliminar las especialidades anteriores
-            resultado_del = transaccion.operacionBD(
+            transaccion.operacionBD(
                 "DELETE "
                 "FROM VETERINARIO_ESPECIALIDAD "
                 "WHERE veterinario_id=%s",
                 (self.id,)
             )
-            if resultado_del is None:
-                transaccion.revertir_transaccion()
-                return False
-
             #Agregar las especialidades
             for una_esp in self.especialidades:
-                resultado_ins = transaccion.operacionBD(
+                transaccion.operacionBD(
                     "INSERT "
                     "INTO VETERINARIO_ESPECIALIDAD (veterinario_id, especialidad_id) "
                     "VALUES (%s, %s)",
                     (self.id, una_esp.id)
                 )
-                if resultado_ins is None:
-                    transaccion.revertir_transaccion()
-                    return False 
-           
             #Se actualizo
             transaccion.confirmar_transaccion()
-            return True 
-               
-        except Exception as err:
-            if transaccion:
-                transaccion.revertir_transaccion()
-            print(f"Error al actualizar el veterinario: {err}")
-            return None
+            return True
+        except DBErrorData as e:
+            raise ValueError(f"No se pudo actualizar el veterinario: {e}")
+        except DBException:
+            print(f"DEBUG - {VeterinarioModel.PREFIX} (update):")
+            raise ModelException('No se pudo actualizar el veterinario en la base de datos.')
         finally:
             if transaccion:
                 transaccion.finalizar_transaccion()
@@ -214,42 +208,25 @@ class VeterinarioModel:
     # Método para eliminar un Veterinario
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
-    def delete(id: int) -> bool | None:
+    def delete(id: int) -> bool:
         transaccion = None
         try:
             transaccion = TransaccionBD()
             transaccion.iniciar_transaccion()
-
-            resultado_esp = transaccion.operacionBD(
-                "DELETE "
-                "FROM VETERINARIO_ESPECIALIDAD "
-                "WHERE veterinario_id=%s",
-                (id,)
+            transaccion.operacionBD(
+                "DELETE FROM VETERINARIO_ESPECIALIDAD WHERE veterinario_id=%s", (id,)
             )
-            if resultado_esp is None:
-                #print(f"DEBUG: Fallo al borrar relacion VETERINARIO_ESPECIALIDAD. rowcount era 0 o menos.")
-                transaccion.revertir_transaccion()
-                return False 
-
-            resultado_vet = transaccion.operacionBD(
-                "DELETE "
-                "FROM VETERINARIOS "
-                "WHERE id=%s",
-                (id,)
-            )
-            if not resultado_vet:
-                #print(f"DEBUG: Fallo al borrar de VETERINARIOS. rowcount era 0 o menos.")
-                transaccion.revertir_transaccion()
-                return False 
-            
+            result = transaccion.operacionBD(
+                "DELETE FROM VETERINARIOS WHERE id=%s", (id,)
+            )        
             #Se borro
             transaccion.confirmar_transaccion()
-            return True
-        except Exception as err:
-            if transaccion:
-                transaccion.revertir_transaccion()
-            #print(f"Error/Exception al eliminar veterinario: {err}")
-            return None
+            return result > 0
+        except DBErrorData as e:
+            raise ValueError(f"No se pudo eliminar el veterinario: {e}")
+        except DBException:
+            print(f"DEBUG - {VeterinarioModel.PREFIX} (delete):")
+            raise ModelException('No se pudo eliminar el veterinario en la base de datos.')
         finally:
             if transaccion:
                 transaccion.finalizar_transaccion()

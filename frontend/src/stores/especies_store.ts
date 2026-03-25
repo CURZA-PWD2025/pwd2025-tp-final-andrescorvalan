@@ -1,14 +1,16 @@
-import type { Especie } from '@/interface/Especie'
+import type { Especie } from '@/interface/especie'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import ApiService from '@/services/ApiService'
+import ApiService from '@/services/api_service'
 
 const url = 'especies/'
 const defaultEspecie: Especie = {
   id: 0,
   nombre: '',
   nombre_cientifico: '',
-  clase: ''
+  clase: '',
+  esperanza_vida: 0,
+  exotica: 0
 }
 const useEspeciesStore = defineStore('especies', () => {
 
@@ -17,88 +19,95 @@ const useEspeciesStore = defineStore('especies', () => {
 
   async function buscar_especie(id: number) {
     const busqueda = especies.value.find((esp) => esp.id === id)
-    if (busqueda) 
+    if (busqueda) {
       especie.value = { ...busqueda }
-    else
-      try {
-        await getOne(id)
-        return especie.value
+      return { 
+        estado:'ok', 
+        objeto: especie.value
+      }
+    }
+    try {
+      return await getOne(id)
       } catch (error) {
         throw error 
       }
-    return especie.value
   }
+
   async function getAll() {
     try {
-      // Solicitar el listado de especies.
-      especies.value = await ApiService.getAll(url) || []
+      const respuesta = await ApiService.getAll(url)
+      especies.value = respuesta.datos || []
+      return respuesta
     } catch (error: any) {
       especies.value = []
       throw error
     }
   }
+
   async function getOne(id: number) {
     try {
       const respuesta = await ApiService.getOne(url, id)
-      if (respuesta && respuesta.id)
-        // Respuesta tiene la especie.
-        especie.value = respuesta 
-      else
-        especie.value = {...defaultEspecie}
+      if (!respuesta.datos) 
+        throw new Error('No se encontraron datos');
+      else {
+        especie.value = respuesta.datos
+        return respuesta
+      }
     } catch (error: any) {
-      especie.value = {...defaultEspecie}
-      throw error // Propagamos el error limpio
+      especie.value = { ...defaultEspecie }
+      throw error
     }
   }
+
   async function create(obj_especie: Especie) {
     try {
       const respuesta = await ApiService.create(url, obj_especie)
-      if (respuesta && respuesta.objeto) {
-        const nuevaEspecie = respuesta.objeto
-        especies.value.push({ ...nuevaEspecie })
-        especie.value = { ...nuevaEspecie }
-        return nuevaEspecie
-      } 
-      throw new Error('Respuesta de creación inesperada del servidor (cuerpo malformado).')
+      const nuevaEspecie = respuesta.objeto
+      especies.value.push({ ...nuevaEspecie })
+      especie.value = { ...nuevaEspecie }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+
   async function update(obj_especie: Especie) {
     if (!obj_especie.id)
-      throw new Error('Especie: No se puede actualizar un especie sin ID.')
+      throw {
+        estado: 'error', 
+        mensaje: 'Especie: No se puede actualizar (ID no válido).' 
+      }
     try {
       const respuesta = await ApiService.update(url, obj_especie.id, obj_especie)
-      if (respuesta && respuesta.estado === 'ok' && respuesta.objeto) {
-        const nuevaEspecie = respuesta.objeto
-        const index = especies.value.findIndex(esp => 
-          esp.id === obj_especie.id)
-        if (index !== -1) {
-          especies.value[index] = { ...nuevaEspecie }
-        }
-        especie.value = { ...nuevaEspecie }
-        return nuevaEspecie
+      const nuevaEspecie = respuesta.objeto
+      const index = especies.value.findIndex(prop => prop.id === obj_especie.id)
+      if (index !== -1) {
+        especies.value[index] = { ...nuevaEspecie }
       }
-      throw new Error(respuesta.mensaje || 'Error al actualizar.')
+      especie.value = { ...nuevaEspecie }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+
   async function destroy(id: number) {
     try {
-      await ApiService.destroy(url, id)
-      especies.value = especies.value.filter(esp =>
-        esp.id !== id);    
-      especie.value = {...defaultEspecie}
-      return true
+      const respuesta = await ApiService.destroy(url, id)
+      especies.value = especies.value.filter(esp => esp.id !== id);    
+      especie.value = { ...defaultEspecie }
+      return respuesta
     } catch (error: any) {
       throw error
     }
   }
+
   function reset() {
     especies.value = []
-    especie.value = {...defaultEspecie}
+    especie.value = { ...defaultEspecie }
   }
+
   return { reset, defaultEspecie, especies, especie, buscar_especie, getAll, getOne, create, update, destroy }
 })
+
 export default useEspeciesStore

@@ -1,16 +1,20 @@
 <script setup lang="ts">
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { onMounted } from 'vue'
 
-  const route = useRouter()
+  const router = useRouter()
+  const route = useRoute()
+
   onMounted(() => {
-    route.push({ name: 'mascotas_list' })
+    if (route.name === 'mascotas') {
+      router.push({ name: 'mascotas_list' })
+    } 
   })
 </script>
 
 <template>
-  <h1>Administración de Mascotas</h1>
   <router-view />
 </template>
+
 
 <style scoped></style>

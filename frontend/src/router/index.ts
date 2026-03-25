@@ -1,14 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ref } from 'vue';
-import HomeView from '../views/HomeView.vue'
-// import AboutView from '../views/AboutView.vue'
-import AdminDBView from '../views/AdminDBView.vue'
+import HomeView from '@/views/HomeView.vue'
+import AdminDBView from '@/views/AdminDBView.vue'
 
 import propietarios_routes from './propietarios_routes'
 import especies_routes from './especies_routes'
 import mascotas_routes from './mascotas_routes'
 import especialidades_routes from './especialidades_routes'
 import veternarios_routes from './veterinarios_routes'
+import atenciones_routes from './atenciones_routes'
+
 
 const routes = [
   {
@@ -21,11 +22,7 @@ const routes = [
   ...mascotas_routes,
   ...especialidades_routes,
   ...veternarios_routes,
-  // {
-  //   path: '/acerca_de',
-  //   name: 'acerca_de',
-  //   component: AboutView,
-  // },
+  ...atenciones_routes,
   {
     path: '/admin_db',
     name: 'admin_db',
@@ -51,8 +48,9 @@ router.beforeEach((to, from) => {
   if (entidadActual !== entidadAnterior || to.name === from.name) {
     recargarBD.value = true; 
   } else {
-    console.log(`Navegación interna en ${entidadActual}`)
     //para intentar detectar falla de q recargarBD pasaba misteriosamente a false
+    console.log(`Navegación interna en ${entidadActual}`)
+
     // recargarBD.value = false; <- posible culpable de la falla de no leer BD cdo debia
   }
   console.log(`Navegando aRecargar BD: ${recargarBD.value}`);
