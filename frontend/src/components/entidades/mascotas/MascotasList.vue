@@ -20,7 +20,7 @@
       return mascotas.value.filter(p => 
         p.nombre.toLowerCase().includes(busqueda) || 
         p.propietario.apellido.toLowerCase().includes(busqueda) ||
-        p.propietario.nombre.toString().includes(busqueda)
+        p.propietario.nombre.toLowerCase().includes(busqueda)
       )
   })
 

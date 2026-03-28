@@ -67,7 +67,7 @@
               <strong>{{ atencion.mascota.nombre }}</strong>
             </div>
             <div class="ficha-tarjeta-fila">
-              <span>Fecha de nacimiento:</span>
+              <span>Fecha Nacimiento:</span>
               <strong>{{ formatearFecha(atencion.mascota.fecha_nac) }}</strong>
             </div>
            <div class="ficha-tarjeta-fila">
@@ -136,7 +136,7 @@
             <div class="ficha-tarjeta-fila">
               <span>Especialidades:</span>
               <strong v-if="atencion.veterinario.especialidades.length > 0">
-                {{ (atencion.veterinario.especialidades as Especialidad[]).map(e => e.nombre).join(', ') }}
+                {{ (atencion.veterinario.especialidades as Especialidad[]).map(e => e.nombre).join(' ') }}
               </strong>
               <strong v-else>
                 Sin especialidades asignadas.

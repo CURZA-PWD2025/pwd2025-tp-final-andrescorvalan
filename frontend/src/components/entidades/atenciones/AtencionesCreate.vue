@@ -8,150 +8,163 @@ import SaveViewGenerico from '@/components/crud-generico/SaveViewGenerico.vue'
 import { useSaveLogicGenerico } from '@/components//crud-generico/SaveLogicGenerico'
 const { mensaje, estado, mostrarModal, saveEntidad, resetSaveLogicGenerico } = useSaveLogicGenerico()
 
+import useAtencionesStore from '@/stores/atenciones_store'
+const { create, defaultAtencion } = useAtencionesStore()
+const newAtencion = ref({ ...defaultAtencion })
+
+import useVeterinariosStore from '@/stores/veterinarios_store'
+const { veterinarios } = toRefs(useVeterinariosStore())
+const { getAll: getall_veterinarios } = useVeterinariosStore()
+const idVeterinario = ref<number>(0)
+
 import useMascotasStore from '@/stores/mascotas_store'
-const { create, defaultMascota } = useMascotasStore()
-const newMascota = ref({ ...defaultMascota })
-
-import usePropietariosStore from '@/stores/propietarios_store'
-const { propietarios } = toRefs(usePropietariosStore())
-const { getAll: getall_propietarios } = usePropietariosStore()
-const idPropietario = ref<number>(0)
-
-import useEspeciesStore from '@/stores/especies_store'
-const { especies } = toRefs(useEspeciesStore())
-const { getAll: getall_especies } = useEspeciesStore()
-const idEspecie = ref<number>(0)
+const { mascotas } = toRefs(useMascotasStore())
+const { getAll: getall_mascotas } = useMascotasStore()
+const idMascota = ref<number>(0)
 
 onMounted(async () => {
   try {
-      await getall_especies()
-      await getall_propietarios()
+      await getall_mascotas()
+      await getall_veterinarios()
     } catch (error) {
-      mensaje.value = "Error al cargar las especies y/o propietarios disponibles."
+      mensaje.value = "Error al cargar las mascotas y/o veterinarios disponibles."
     }
 })
 
-async function nueva_mascota() {
-  if (!newMascota.value.nombre || !newMascota.value.fecha_nac || 
-      !idPropietario || !idEspecie) {
+async function nueva_atencion() {
+  if (!newAtencion.value.fecha || !newAtencion.value.diagnostico || !newAtencion.value.tratamiento ||
+      !idVeterinario || !idMascota) {
     mensaje.value = 'Debe completar todos los campos obligatorios (*).'
     estado.value = 'error'
     return
   }
-  newMascota.value.especie.id = idEspecie.value
-  newMascota.value.propietario.id = idPropietario.value
+  newAtencion.value.mascota.id = idMascota.value
+  newAtencion.value.veterinario.id = idVeterinario.value
   await saveEntidad(
-    () => create(newMascota.value),
+    () => create(newAtencion.value),
   )
   if (estado.value==='exito') {
-      newMascota.value = { ...defaultMascota }
-      idEspecie.value = 0
-      idPropietario.value = 0
+      newAtencion.value = { ...defaultAtencion }
+      idMascota.value = 0
+      idVeterinario.value = 0
   }
 }
 </script>
 
 <template>
   <SaveViewGenerico
-    titulo="Nueva Atencion"
+    titulo="Nueva Atención"
     :estado="estado" 
     :mensaje="mensaje" 
     :mostrarModal="mostrarModal"
-    @volver="router.push({name: 'mascotas_list'})"
-    @submit="nueva_mascota"
-    @reset="newMascota = { ...defaultMascota }"
+    @volver="router.push({name: 'atenciones_list'})"
+    @submit="nueva_atencion"
+    @reset="newAtencion = { ...defaultAtencion }; idMascota=0; idVeterinario=0"
     @cerrarModal="resetSaveLogicGenerico"
   >
     <div class="crud-field-group">
-      <div class="crud-field">
-        <label class="crud-field-name" for="nombre">
-          Nombre:
+      <div class="crud-field"> 
+        <label class="crud-field-name" for="fecha">
+          Fecha:
           <abbr class="crud-abbr" 
-            title="Nombre de la mascota (obligatorio)">*
+            title="Fecha de la atención veterinaria (obligatorio)">*
           </abbr>
         </label>
         <input class="crud-input crud-data"
-          id="nombre"
-          type="text"
-          v-model="newMascota.nombre"
-          placeholder="Ej: Firulais"
-          maxlength="35"
-          style="width: 42ch;"
+          id="fecha"
+          type="date"
+          v-model="newAtencion.fecha"
+          style="width: 15ch;"
           autofocus
           required/>
-      </div>
-      <div class="crud-field"> 
-        <label class="crud-field-name" for="fecha_nac">
-          Fecha de Nacimiento:
-          <abbr class="crud-abbr" 
-            title="Fecha de nacimiento de la mascota (obligatorio)">*
-          </abbr>
-        </label>
-        <input class="crud-input crud-data"
-          id="fecha_nac"
-          type="date"
-          v-model="newMascota.fecha_nac"
-          style="width: 30ch;"
-          required/>
-      </div>
-      <div class="crud-field"> 
-        <label class="crud-field-name" for="sexo">
-          Sexo:
-          <abbr class="crud-abbr" 
-            title="Sexo de la mascota (obligatorio)">*
-          </abbr>
-        </label>
-        <select class="crud-input crud-data" 
-          id="sexo"
-          v-model="newMascota.sexo"
-          style="width: 10ch;"
-          required>
-          <option value="" disabled>
-            Seleccione el sexo
-          </option>
-          <option value="M">Macho</option>
-          <option value="F">Hembra</option>
-        </select>
       </div>
     </div>
     <div class="crud-field-group">
       <div class="crud-field"> 
-        <label class="crud-field-name" for="propietario">
-          Propietario:
+        <label class="crud-field-name" for="veterinario">
+          Veterinario:
           <abbr class="crud-abbr" 
-            title="Propietario de la mascota (obligatorio)">*
+            title="Veterinario que realiza la atención (obligatorio)">*
           </abbr>
         </label>
         <select class="crud-input crud-data" 
-          id="propietario"
-          v-model="idPropietario" 
+          id="veterinario"
+          v-model="idVeterinario"
+          style="width: 25ch;"
           required>
           <option value="" disabled>
-            Seleccione un propietario
+            Seleccione un veterinario
           </option>
-          <option v-for="prop in propietarios" :key="prop.id" :value="prop.id">
-            {{ prop.apellido }}, {{ prop.nombre }}
+          <option v-for="elVete in veterinarios" :key="elVete.id" :value="elVete.id">
+            {{ elVete.apellido }}, {{ elVete.nombre }}
           </option>
         </select>
       </div>
       <div class="crud-field">
-        <label for="especie" class="crud-field-name">
-          Especie:
+        <label for="mascota" class="crud-field-name">
+          Mascota:
           <abbr class="crud-abbr" 
-            title="Especie de la mascota (obligatorio)">*
+            title="Mascota atendida (obligatorio)">*
           </abbr>
         </label>
         <select class="crud-input crud-data" 
-          id="especie" 
-          v-model="idEspecie" 
+          id="mascota" 
+          v-model="idMascota" 
+          style="width: 25ch;"
           required>
           <option value="" disabled>
-            Seleccione una especie
+            Seleccione una mascota
           </option>
-          <option v-for="esp in especies" :key="esp.id" :value="esp.id">
-            {{ esp.nombre }} ({{  esp.nombre_cientifico }})
+          <option v-for="laMascota in mascotas" :key="laMascota.id" :value="laMascota.id">
+            {{ laMascota.nombre }}, duaño/a: ({{  laMascota.propietario.apellido }})
           </option>
         </select>
+      </div>
+    </div>
+    <div class="crud-field-group">
+      <div class="crud-field">
+        <label class="crud-field-name" for="diagnostico">
+          Diagnostico:
+          <abbr class="crud-abbr" 
+            title="Diagnóstico del veterinario (obligatorio)">*
+          </abbr>
+        </label>
+        <textarea class="crud-input crud-data"
+          id="diagnostico"
+          v-model="newAtencion.diagnostico"
+          placeholder="Ej: Infección bucal"
+          rows="5"
+          style="width: 55ch; resize: none;"
+          required>
+        </textarea>
+      </div>
+      <div class="crud-field">
+        <label class="crud-field-name" for="tratamiento">
+          Tratamiento:
+          <abbr class="crud-abbr" 
+            title="Tratamiento indicado (obligatorio)">*
+          </abbr>
+        </label>
+        <textarea class="crud-input crud-data"
+          id="tratamiento"
+          v-model="newAtencion.tratamiento"
+          placeholder="Ej: Antibiótico Odontobiotic por 7 días"
+          rows="5"
+          style="width: 55ch; resize: none;"
+          required>
+        </textarea>
+      </div>
+        <div class="crud-field">
+        <label class="crud-field-name" for="observaciones">
+          Observaciones:
+        </label>
+        <textarea class="crud-input crud-data"
+          id="observaciones"
+          v-model="newAtencion.observaciones"
+          placeholder="Ej: Buen estado general"
+          rows="5"
+          style="width: 55ch; resize: none;">
+        </textarea>
       </div>
     </div>
   </SaveViewGenerico>

@@ -49,9 +49,9 @@
     if (accion === 'clear')
       mje_advertencia.value = '¿Desesa BORRAR TODAS las tablas? Esta acción no se puede deshacer.'
     if (accion === 'setup')
-      mje_advertencia.value = '¿Desea crear la estructura de tablas vacía?'
+      mje_advertencia.value = '¿Desea crear la estructura de tablas vacía? Esta acción elimina los datos actuales.'
     if (accion === 'seed')
-      mje_advertencia.value = '¿Desea crear la estructura de tablas y cargar datos de ejemplo?'
+      mje_advertencia.value = '¿Desea crear la estructura de tablas y cargar datos de ejemplo? Esta acción elimina los datos actuales.'
   }
 
   async function ejecutarAccion() {

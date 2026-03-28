@@ -97,7 +97,7 @@ const useAtencionesStore = defineStore('atenciones', () => {
           'tratamiento': obj_atencion.tratamiento,
           'observaciones': obj_atencion.observaciones,
           'mascota_id': obj_atencion.mascota.id,
-          'veterinario': obj_atencion.veterinario.id
+          'veterinario_id': obj_atencion.veterinario.id
         }
       )
       const nuevaAtencion = respuesta.objeto
@@ -124,7 +124,7 @@ const useAtencionesStore = defineStore('atenciones', () => {
           'tratamiento': obj_atencion.tratamiento,
           'observaciones': obj_atencion.observaciones,
           'mascota_id': obj_atencion.mascota.id,
-          'veterinario': obj_atencion.veterinario.id
+          'veterinario_id': obj_atencion.veterinario.id
         }
       )
       const nuevaAtencion = respuesta.objeto

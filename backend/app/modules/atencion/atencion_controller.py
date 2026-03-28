@@ -126,7 +126,7 @@ class AtencionController:
                 return {
                     'estado': 'ok',
                     'mensaje': 'Atención creada con éxito.',
-                    'objecto': data_completo
+                    'objeto': data_completo
                 }
             #else
             return {

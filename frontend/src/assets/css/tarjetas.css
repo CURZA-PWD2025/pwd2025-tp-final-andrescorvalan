@@ -57,10 +57,21 @@
   font-weight: 500;
 }
 .ficha-tarjeta-fila {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
+  display: grid;
+  grid-template-columns: 140px 1fr; 
+  gap: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 0.95rem;
+  align-items: baseline;
 }
 
-.ficha-tarjeta-fila  span { color: #5b5d5d; }
+.ficha-tarjeta-fila strong { 
+  text-align: right;
+  word-break: break-word;
+}
+
+.ficha-tarjeta-fila span { 
+  text-align: left;
+  word-break: break-word;
+  color: #5b5d5d;
+}

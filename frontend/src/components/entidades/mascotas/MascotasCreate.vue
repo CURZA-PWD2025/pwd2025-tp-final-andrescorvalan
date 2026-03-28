@@ -53,13 +53,13 @@ async function nueva_mascota() {
 
 <template>
   <SaveViewGenerico
-    titulo="Nueva mascora"
+    titulo="Nueva mascota"
     :estado="estado" 
     :mensaje="mensaje" 
     :mostrarModal="mostrarModal"
     @volver="router.push({name: 'mascotas_list'})"
     @submit="nueva_mascota"
-    @reset="newMascota = { ...defaultMascota }"
+    @reset="newMascota = { ...defaultMascota }; idPropietario=0; idEspecie=0"
     @cerrarModal="resetSaveLogicGenerico"
   >
     <div class="crud-field-group">

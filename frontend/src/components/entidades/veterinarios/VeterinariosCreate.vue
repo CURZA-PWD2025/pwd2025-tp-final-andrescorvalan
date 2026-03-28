@@ -50,9 +50,9 @@ async function nuevo_veterinario() {
     :estado="estado" 
     :mensaje="mensaje" 
     :mostrarModal="mostrarModal"
-    @volver="router.push({name: 'especialidades_list'})"
+    @volver="router.push({name: 'veterinarios_list'})"
     @submit="nuevo_veterinario"
-    @reset="newVeterinario = { ...defaultVeterinario }"
+    @reset="newVeterinario = { ...defaultVeterinario };  idsEspecialidades = []"
     @cerrarModal="resetSaveLogicGenerico"
   >
     <div class="crud-field-group">
@@ -145,16 +145,22 @@ async function nuevo_veterinario() {
     <div class="crud-field-group">
       <fieldset class="crud-fieldset">
         <legend>Especialidades</legend>
-        <div v-for="esp in especialidades" :key="esp.id" class="crud-item-checkbox">
-          <input
-            type="checkbox"
-            :id="'esp' + esp.id"
-            :value="esp.id"
-            v-model="idsEspecialidades"
-          >
-          <label :for="'esp' + esp.id">{{ esp.nombre }}</label>
+        <div v-if="especialidades.length>0">
+          <div v-for="esp in especialidades" :key="esp.id" class="crud-item-checkbox">
+            <input
+              type="checkbox"
+              :id="'esp' + esp.id"
+              :value="esp.id"
+              v-model="idsEspecialidades"
+            >
+            <label :for="'esp' + esp.id">{{ esp.nombre }}</label>
+          </div>
+        </div>
+        <div v-else>
+          No hay especialidades cargadas.
         </div>
       </fieldset>
+
     </div>
    </SaveFormGenerico>
 </template>

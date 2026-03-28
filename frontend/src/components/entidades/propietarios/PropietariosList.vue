@@ -19,7 +19,7 @@
       return propietarios.value.filter(p => 
         p.nombre.toLowerCase().includes(busqueda) || 
         p.apellido.toLowerCase().includes(busqueda) ||
-        p.telefono.toLowerCase().includes(busqueda)
+        p.telefono.includes(busqueda)
       )
   })
 
