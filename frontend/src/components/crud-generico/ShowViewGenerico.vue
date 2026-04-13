@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue"
 
 // Props para recibir datos del padre
 defineProps(['titulo', 'mensaje']);
 // Emits para generar eventos para el padre
-defineEmits(['volver', 'submit', 'reset', 'cerrarModal']);
+defineEmits(['volver']);
 </script>
 
 <template>
@@ -14,7 +13,7 @@ defineEmits(['volver', 'submit', 'reset', 'cerrarModal']);
         {{ titulo }}
       </h2>
       <button @click="$emit('volver')" class="boton boton-back" type="button">
-        <Icon class="icono" icon="mdi:arrow-left"/>
+        <icon-mdi-arrow-left class="icono" />
         Volver
       </button>
     </header>

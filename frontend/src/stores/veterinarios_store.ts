@@ -2,6 +2,8 @@ import type { Veterinario } from '@/interface/veterinario'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
+
 
 const url = 'veterinarios/'
 const defaultVeterinario: Veterinario = {
@@ -19,17 +21,21 @@ const useVeterinariosStore = defineStore('veterinarios', () => {
   const veterinarios = ref<Array<Veterinario>>([])
   const veterinario = ref<Veterinario>({ ...defaultVeterinario })
 
-  async function buscar_veterinario(id: number) {
-    const busqueda = veterinarios.value.find((veterinario) => veterinario.id === id)
-    if (busqueda)  {
-      veterinario.value =  { ...busqueda }
-      return { 
-        estado:'ok', 
+  async function buscar_veterinario(id: number): Promise<ApiRespuesta> {
+    const encontrado = veterinarios.value.find((veterinario) => veterinario.id === id)
+    if (encontrado) {
+      veterinario.value = { ...encontrado }
+      return {
+        estado: 'ok',
+        mensaje: 'Encontrado localmente',
         objeto: veterinario.value
       }
     }
     try {
-      return await getOne(id)
+      const respuesta = await getOne(id) 
+      respuesta.objeto = respuesta.datos 
+      veterinario.value = { ...respuesta.objeto }
+      return respuesta
     } catch (error) {
       throw error 
     }
@@ -67,6 +73,7 @@ const useVeterinariosStore = defineStore('veterinarios', () => {
       const nuevoVeterinario = respuesta.objeto
       veterinarios.value.push({ ...nuevoVeterinario })
       veterinario.value = { ...nuevoVeterinario }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -87,7 +94,8 @@ const useVeterinariosStore = defineStore('veterinarios', () => {
         veterinarios.value[index] = { ...nuevoVeterinario }
       }
       veterinario.value = { ...nuevoVeterinario }
-            return respuesta
+      await getAll()
+      return respuesta
     } catch (error: any) {
       throw error
     }
@@ -98,6 +106,7 @@ const useVeterinariosStore = defineStore('veterinarios', () => {
       const respuesta = await ApiService.destroy(url, id)
       veterinarios.value = veterinarios.value.filter(vete => vete.id !== id);    
       veterinario.value = {...defaultVeterinario}
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

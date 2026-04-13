@@ -1,8 +1,8 @@
-const veterinarioes_routes = [
+const veterinarios_routes = [
   {
     path: '/veterinarios',
-    name: 'veterinarios',
     component: () => import('@/views/VeterinariosView.vue'),
+    redirect: { name: 'veterinarios_list' },
     children: [
       {
         path: '',
@@ -27,4 +27,4 @@ const veterinarioes_routes = [
     ],
   },
 ]
-export default veterinarioes_routes
+export default veterinarios_routes

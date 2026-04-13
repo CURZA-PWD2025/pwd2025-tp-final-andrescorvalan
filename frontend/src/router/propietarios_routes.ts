@@ -1,8 +1,8 @@
 const propietarios_routes = [
   {
     path: '/propietarios',
-    name: 'propietarios',
     component: () => import('@/views/PropietariosView.vue'),
+    redirect: { name: 'propietarios_list' },
     children: [
       {
         path: '',

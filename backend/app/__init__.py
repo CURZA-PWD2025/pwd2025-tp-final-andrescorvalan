@@ -8,6 +8,8 @@ from .modules.mascota.mascota_routes import mascota_bp
 from .modules.especialidad.especialidad_routes import especialidad_bp
 from .modules.admindb.admindb_routes import admindb_bp
 from .modules.atencion.atencion_routes import atencion_bp
+from .modules.turno.turno_routes import turno_bp
+
 
 
 def create_app():
@@ -20,6 +22,7 @@ def create_app():
     app.register_blueprint(especialidad_bp)
     app.register_blueprint(admindb_bp)
     app.register_blueprint(atencion_bp)
+    app.register_blueprint(turno_bp)
 
     # Ruta de prueba
     @app.route('/')

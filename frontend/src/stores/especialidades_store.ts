@@ -2,6 +2,7 @@ import type { Especialidad } from '@/interface/especialidad'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
 
 const url = 'especialidades/'
 const defaultEspecialidad: Especialidad = {
@@ -15,21 +16,25 @@ const useEspecialidadesStore = defineStore('especialidades', () => {
   const especialidades = ref<Array<Especialidad>>([])
   const especialidad = ref<Especialidad>({ ...defaultEspecialidad })
 
-  async function buscar_especialidad(id: number) {
-    const busqueda = especialidades.value.find((esp) => esp.id === id)
-    if (busqueda) {
-      especialidad.value = { ...busqueda }
-      return { 
-        estado:'ok', 
-        objeto: especialidad.value
+  async function buscar_especialidad(id: number): Promise<ApiRespuesta> {
+      const encontrado = especialidades.value.find((especialidad) => especialidad.id === id)
+      if (encontrado) {
+        especialidad.value = { ...encontrado }
+        return {
+          estado: 'ok',
+          mensaje: 'Encontrado localmente',
+          objeto: especialidad.value
+        }
+      }
+      try {
+        const respuesta = await getOne(id) 
+        respuesta.objeto = respuesta.datos 
+        especialidad.value = { ...respuesta.objeto }
+        return respuesta
+      } catch (error) {
+        throw error 
       }
     }
-    try {
-      return await getOne(id)
-    } catch (error) {
-      throw error 
-    }
-  }
 
   async function getAll() {
     try {
@@ -63,6 +68,7 @@ const useEspecialidadesStore = defineStore('especialidades', () => {
       const nuevaEspecialidad = respuesta.objeto
       especialidades.value.push({ ...nuevaEspecialidad })
       especialidad.value = { ...nuevaEspecialidad }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -83,6 +89,7 @@ const useEspecialidadesStore = defineStore('especialidades', () => {
         especialidades.value[index] = { ...nuevaEspecilidad }
       }
       especialidad.value = { ...nuevaEspecilidad }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -94,6 +101,7 @@ const useEspecialidadesStore = defineStore('especialidades', () => {
       const respuesta = await ApiService.destroy(url, id)
       especialidades.value = especialidades.value.filter(esp => esp.id !== id);    
       especialidad.value = { ...defaultEspecialidad }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

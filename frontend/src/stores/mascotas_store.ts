@@ -2,6 +2,7 @@ import type { Mascota } from '@/interface/mascota'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
 
 const url = 'mascotas/'
 
@@ -19,21 +20,25 @@ const useMascotasStore = defineStore('mascotas', () => {
   const mascotas = ref<Array<Mascota>>([])
   const mascota = ref<Mascota>({ ...defaultMascota })
 
-  async function buscar_mascota(id: number) {
-    const busqueda = mascotas.value.find((mascota) => mascota.id === id)
-    if (busqueda) {
-      mascota.value = { ...busqueda }
-      return { 
-        estado:'ok', 
-        objeto: mascota.value
+  async function buscar_mascota(id: number): Promise<ApiRespuesta> {
+      const encontrado = mascotas.value.find((mascota) => mascota.id === id)
+      if (encontrado) {
+        mascota.value = { ...encontrado }
+        return {
+          estado: 'ok',
+          mensaje: 'Encontrado localmente',
+          objeto: mascota.value
+        }
+      }
+      try {
+        const respuesta = await getOne(id) 
+        respuesta.objeto = respuesta.datos 
+        mascota.value = { ...respuesta.objeto }
+        return respuesta
+      } catch (error) {
+        throw error 
       }
     }
-    try {
-      return await getOne(id)
-    } catch (error) {
-      throw error 
-    }
-  }
 
   async function getAll() {
     try {
@@ -75,6 +80,7 @@ const useMascotasStore = defineStore('mascotas', () => {
       const nuevaMascota = respuesta.objeto
       mascotas.value.push({ ...nuevaMascota })
       mascota.value = { ...nuevaMascota }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -103,6 +109,7 @@ const useMascotasStore = defineStore('mascotas', () => {
         mascotas.value[index] = { ...nuevaMascota }
       }
       mascota.value = { ...nuevaMascota }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -114,6 +121,7 @@ const useMascotasStore = defineStore('mascotas', () => {
       const respuesta = await ApiService.destroy(url, id)
       mascotas.value = mascotas.value.filter(masc => masc.id !== id);    
       mascota.value = { ...defaultMascota }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

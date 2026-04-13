@@ -57,7 +57,7 @@ async function nueva_atencion() {
     :estado="estado" 
     :mensaje="mensaje" 
     :mostrarModal="mostrarModal"
-    @volver="router.push({name: 'atenciones_list'})"
+    @volver="router.back()"
     @submit="nueva_atencion"
     @reset="newAtencion = { ...defaultAtencion }; idMascota=0; idVeterinario=0"
     @cerrarModal="resetSaveLogicGenerico"

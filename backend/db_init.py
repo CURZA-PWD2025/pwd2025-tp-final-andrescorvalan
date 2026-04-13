@@ -27,7 +27,6 @@ TABLES['PROPIETARIOS'] = (
     "  PRIMARY KEY (`id`)"
     ") "
 )
-
 TABLES['VETERINARIOS'] = (
     "CREATE TABLE `VETERINARIOS` ("
     "  `id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -39,7 +38,6 @@ TABLES['VETERINARIOS'] = (
     "  PRIMARY KEY (`id`)"
     ") "
 )
-
 TABLES['ESPECIALIDADES'] = (
     "CREATE TABLE `ESPECIALIDADES` ("
     "  `id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -49,7 +47,6 @@ TABLES['ESPECIALIDADES'] = (
     "  PRIMARY KEY (`id`)"
     ") "
 )
-
 TABLES['ESPECIES'] = (
     "CREATE TABLE `ESPECIES` ("
     "  `id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -61,7 +58,6 @@ TABLES['ESPECIES'] = (
     "  PRIMARY KEY (`id`)"
     ") "
 )
-
 TABLES["VETERINARIO_ESPECIALIDAD"] = (
     "CREATE TABLE `VETERINARIO_ESPECIALIDAD` ("
     "  `veterinario_id` int(11) NOT NULL,"
@@ -71,7 +67,6 @@ TABLES["VETERINARIO_ESPECIALIDAD"] = (
     "  foreign key (`especialidad_id`) references ESPECIALIDADES(id) ON DELETE RESTRICT"
     ") "
 )
-
 TABLES['MASCOTAS'] = (
     "CREATE TABLE `MASCOTAS` ("
     "  `id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -85,7 +80,6 @@ TABLES['MASCOTAS'] = (
     "  foreign key (`especie_id`) references ESPECIES(id) ON DELETE RESTRICT"
     ") "
 )
-
 TABLES['ATENCIONES'] = (
     "CREATE TABLE `ATENCIONES` ("
     "  `id` int(11) NOT NULL AUTO_INCREMENT,"
@@ -100,7 +94,20 @@ TABLES['ATENCIONES'] = (
     "  foreign key (`veterinario_id`) references VETERINARIOS(id) ON DELETE RESTRICT"
     ") "
 )
-
+TABLES['TURNOS'] = (
+    "CREATE TABLE `TURNOS` ("
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,"
+    "  `fecha_hora` datetime NOT NULL,"
+    "  `estado` ENUM('Pendiente', 'Atendido', 'Ausente') NOT NULL DEFAULT 'Pendiente',"
+    "  `motivo` varchar(255) NOT NULL DEFAULT '',"
+    "  `mascota_id` int(11) NOT NULL,"
+    "  `veterinario_id` int(11) NOT NULL,"
+    "  PRIMARY KEY (`id`),"
+    "  foreign key (`mascota_id`) references MASCOTAS(id) ON DELETE RESTRICT,"
+    "  foreign key (`veterinario_id`) references VETERINARIOS(id) ON DELETE RESTRICT,"
+    "  UNIQUE KEY `uk_veterinario_fecha` (`veterinario_id`, `fecha_hora`)"
+    ") "
+)
 SEEDS['PROPIETARIOS'] = (
     "INSERT INTO PROPIETARIOS (id, nombre, apellido, dni, telefono, email) "
     "VALUES (%s, %s, %s, %s, %s, %s)",
@@ -112,36 +119,27 @@ SEEDS['PROPIETARIOS'] = (
         (5, 'Carlos', 'Gómez', '31987456', '1155667788', 'carlos.gomez@test.com'),
         (6, 'Ana', 'Sánchez', '25123987', '1199887766', 'ana.sanchez@test.com'),
         (7, 'Beatriz', 'López', '40123123', '1122446688', 'blopez@test.com'),
-        (8, 'Esteban', 'Quito', '22333444', '1133557799', 'equito@test.com')
+        (8, 'Esteban', 'Quito', '22333444', '1133557799', 'equito@test.com'),
     ]
 )
-
 SEEDS["VETERINARIOS"] = (
     "INSERT INTO VETERINARIOS (id, nombre, apellido, matricula, telefono, email) "
     "VALUES (%s, %s, %s, %s, %s, %s)",
     [
         (1, 'Roberto', 'Sánchez', 'MP1024', '1145678901', 'roberto.sanchez@vet.com'),
         (2, 'Elena', 'Gatti', 'MP2156', '1156789012', 'elena.gatti@clinica.com'),
-        (3, 'Marcos', 'Paz', 'MP0987', '1167890123', 'mpaz_vet@hotmail.com'),
-        (4, 'Julieta', 'Ortega', 'MP3342', '1178901234', 'j.ortega@vetservicios.com'),
-        (5, 'Lucía', 'Fernández', 'MP4455', '1188776655', 'lucia.f@vet.com'),
-        (6, 'Daniel', 'Ríos', 'MP6677', '1122112211', 'drios_veterinaria@test.com'),
-        (7, 'Sofía', 'Castro', 'MP8899', '1144332211', 'scastro.vet@test.com')
     ]
 )
-
 SEEDS['ESPECIALIDADES'] = (
     "INSERT INTO ESPECIALIDADES (id, nombre, descripcion, activa) "
     "VALUES (%s, %s, %s, %s)",
     [
         (1, 'Cirugía General', 'Intervenciones quirúrgicas de tejidos blandos y traumatología.',1),
-        (2, 'Dermatología', 'Tratamiento de afecciones de la piel y alergias.',1),
-        (3, 'Cardiología', 'Diagnóstico y tratamiento de enfermedades del corazón.',1),
-        (4, 'Clínica de Felinos', 'Especialista dedicado exclusivamente al cuidado de gatos.',1),
+        (2, 'Odontología', 'Limpieza dental y extracciones.', 1),
+        (3, 'Dermatología', 'Tratamiento de afecciones de la piel y alergias.',1),
+        (4, 'Cardiología', 'Diagnóstico y tratamiento de enfermedades del corazón.',1),
         (5, 'Oftalmología', 'Tratamiento de patologías oculares y visión.',0),
         (6, 'Nutrición Animal', 'Dietas especiales para patologías crónicas.', 1),
-        (7, 'Fisioterapia', 'Rehabilitación post-quirúrgica y dolores crónicos.', 1),
-        (8, 'Odontología', 'Limpieza dental y extracciones.', 1)
     ]
 )
 SEEDS['VETERINARIO_ESPECIALIDAD'] = (
@@ -150,10 +148,10 @@ SEEDS['VETERINARIO_ESPECIALIDAD'] = (
     [
         (1, 1),
         (1, 3),
-        (2, 2),
         (2, 4),
         (2, 5),
-        (3, 1)
+        (2, 6),
+        (1, 2),
     ]
 )
 SEEDS['ESPECIES'] = (
@@ -162,11 +160,8 @@ SEEDS['ESPECIES'] = (
     [
         (1, 'Perro', 'Canis lupus familiaris', 'Mamífero',10,0),
         (2, 'Gato', 'Felis catus', 'Mamífero',15,0),
-        (3, 'Loro Hablador', 'Amazona aestiva', 'Ave',30,0),
+        (3, 'Conejo', 'Oryctolagus cuniculus', 'Mamífero', 8, 0),
         (4, 'Tortuga de Tierra', 'Chelonoidis chilensis', 'Reptil',100,1),
-        (5, 'Conejo', 'Oryctolagus cuniculus', 'Mamífero', 8, 0),
-        (6, 'Hámster', 'Cricetinae', 'Mamífero', 2, 0),
-        (7, 'Iguana Verde', 'Iguana iguana', 'Reptil', 20, 1)
     ]
 )
 SEEDS['MASCOTAS'] = (
@@ -176,29 +171,46 @@ SEEDS['MASCOTAS'] = (
         (1, 'Firulais', '2020-05-15','Macho', 1, 1),
         (2, 'Michi', '2021-10-20','Hembra', 2, 2),
         (3, 'Paco', '2019-03-12','Macho', 3, 3),
-        (4, 'Tambor', '2022-01-05','Hembra', 4, 4)
+        (4, 'Tambor', '2022-01-05','Hembra', 4, 4),
+        (5, 'Bobby', '2020-05-15','Macho', 5, 1),
+        (6, 'Biky', '2021-10-20','Hembra', 6, 2),
+        (7, 'Sultán', '2019-03-12','Macho', 7, 1),
+        (8, 'Negro', '2022-01-05','Macho', 8, 1),
     ]
 )
-
+SEEDS['TURNOS'] = (
+    "INSERT INTO TURNOS (id, fecha_hora, estado, motivo, mascota_id, veterinario_id) "
+    "VALUES (%s, %s, %s, %s, %s, %s)",
+    [
+        # --- TURNOS PASADOS (Atendidos) ---
+        (1, '2026-04-06 09:00:00', 'Atendido', 'Control post-cirugía', 1, 1),
+        (2, '2026-04-06 09:30:00', 'Atendido', 'Limpieza dental', 7, 1),
+        (3, '2026-04-07 16:30:00', 'Atendido', 'Consulta cardiológica', 2, 2),
+        (4, '2026-04-07 17:30:00', 'Atendido', 'Ajuste de dieta', 6, 2),
+        (5, '2026-04-08 10:00:00', 'Atendido', 'Vacunación refuerzo', 5, 1),
+        (6, '2026-04-08 10:30:00', 'Atendido', 'Consulta dermatológica', 8, 1),
+        # --- DÍA DE LA ENTREGA (13/04) (Pendientes) ---
+        (7, '2026-04-13 09:00:00', 'Pendiente', 'Extracción dental', 1, 1),
+        (8, '2026-04-13 10:00:00', 'Pendiente', 'Cirugía programada', 5, 1),
+        (9, '2026-04-13 11:30:00', 'Pendiente', 'Control de puntos', 8, 1),
+        (10, '2026-04-13 16:30:00', 'Pendiente', 'Ecocardiograma', 2, 2),
+        (11, '2026-04-13 17:00:00', 'Pendiente', 'Control obesidad', 4, 2),
+        (12, '2026-04-13 18:00:00', 'Pendiente', 'Urgencia - Tos persistente', 6, 2),
+        # --- FUTUROS (Pendientes) ---
+        (13, '2026-04-14 09:30:00', 'Pendiente', 'Chequeo general', 3, 1),
+        (14, '2026-04-15 16:30:00', 'Pendiente', 'Evaluación cardíaca', 2, 2),
+    ]
+)
 SEEDS['ATENCIONES'] = (
     "INSERT INTO ATENCIONES (id, fecha, diagnostico, tratamiento, observaciones, mascota_id, veterinario_id) "
     "VALUES (%s, %s, %s, %s, %s, %s, %s)",
     [
-        (1, '2026-01-10', 'Control anual y vacunación.', 'Se aplica vacuna Quíntuple y Rabia. Refuerzo en un año.', 'Paciente en buen estado general.', 1, 1),
-        (2, '2026-02-05', 'Infección urinaria leve.', 'Cefalexina 500mg: 1 comprimido cada 12hs por 7 días.\nAbundante agua.', 'Realizar análisis de orina si no mejora en 48hs.', 2, 2),
-        (3, '2026-02-15', 'Otitis externa en oído derecho.', 'Limpieza con solución fisiológica.\nGotas Otiflex: 3 gotas cada 8hs por 10 días.', 'Se recomienda uso de collar isabelino.', 3, 3),
-        (4, '2026-03-01', 'Desparasitación interna y externa.', 'Pipeta contra pulgas y garrapatas.\nPastilla antiparasitaria según peso (5kg).', 'Próxima aplicación en 30 días.', 4, 4),
-        (5, '2026-03-05', 'Gastroenteritis por cambio de dieta.', 'Dieta blanda (pollo y arroz) por 48hs.\nReliverán: 5 gotas cada 8hs si hay vómitos.', 'El propietario indica que comió alimento nuevo.', 1, 2),
-        (6, '2026-03-10', 'Control de peso.', 'Cambio a alimento light.', 'Bajó 200gr respecto al mes pasado.', 1, 1),
-        (7, '2026-03-12', 'Limpieza de herida.', 'Curación con yodo.', 'Herida pequeña en pata trasera.', 2, 2),
-        (8, '2026-03-15', 'Vacunación refuerzo.', 'Séxtuple aplicada.', 'Sin reacciones adversas.', 1, 3),
-        (9, '2026-03-18', 'Consulta por picazón.', 'Apoquel 5.4mg.', 'Posible alergia estacional.', 1, 1),
-        (10, '2026-03-20', 'Corte de uñas y limpieza.', 'Servicio estético.', 'Paciente muy tranquilo.', 2, 4),
-        (11, '2026-03-22', 'Control post-cirugía.', 'Retiro de puntos.', 'Cicatrización perfecta.', 3, 1),
-        (12, '2026-03-25', 'Análisis de sangre.', 'Extracción de muestra.', 'Resultados en 24hs.', 1, 2),
-        (13, '2026-03-26', 'Ecografía abdominal.', 'Estudio por imagen.', 'No se observan anomalías.', 2, 1),
-        (14, '2026-03-28', 'Desparasitación periódica.', 'Pastilla Total Full.', 'Se entrega recordatorio.', 1, 4),
-        (15, '2026-03-30', 'Urgencia - Vómitos.', 'Suero fisiológico.', 'Queda en observación 2 horas.', 1, 2)
+        (1, '2026-04-06', 'Herida sana', 'Continuar faja', 'Sin signos de infección.', 1, 1),
+        (2, '2026-04-06', 'Sarro moderado', 'Limpieza profunda', 'Se recomienda cepillado.', 7, 1),
+        (3, '2026-04-07', 'Soplo grado II', 'Enalapril', 'Michi debe evitar el estrés.', 2, 2),
+        (4, '2026-04-07', 'Sobrepeso', 'Dieta controlada', 'Biky bajó 100g.', 6, 2),
+        (5, '2026-04-08', 'Salud óptima', 'Vacuna Rabia', 'Bobby pesó 12kg.', 5, 1),
+        (6, '2026-04-08', 'Alergia leve', 'Champú especial', 'Piel irritada en abdomen.', 8, 1),
     ]
 )
 
@@ -250,7 +262,6 @@ if __name__ == "__main__":
     create_database(cursor)
     cursor.close()
     cxn.close()
-
 
     CONF_DB = DB_CONFIG.copy()
     CONF_DB['database'] = DB_NAME

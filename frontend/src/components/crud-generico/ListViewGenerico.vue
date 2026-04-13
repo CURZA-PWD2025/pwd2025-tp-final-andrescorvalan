@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue"
 
 // Props para recibir datos del padre
 defineProps(['titulo', 'estado', 'borrando', 'mensaje', 'idEliminar', 'identEliminar','mostrarModal']);
@@ -17,7 +16,7 @@ defineEmits(['refrescar', 'eliminar', 'cerrarModal']);
         <slot name="buscador"></slot>
         <div class="crud-botones">
           <button @click="$emit('refrescar')" class="boton boton-refresh" :disabled="estado === 'leyendo'">
-            <Icon class="icono" icon="mdi:refresh"/>
+            <icon-mdi-refresh class="icono"/>
             Actualizar
           </button>
           <!-- Botones (Agregar...), Input para Buscar, etc - Definidos en list especificos-->
@@ -70,7 +69,7 @@ defineEmits(['refrescar', 'eliminar', 'cerrarModal']);
       <div v-else>
         <!-- Se borro con exito -->
         <div v-if="estado === 'exito'" class="ventana-emergente ventana-emergente-exito">
-          <Icon class="ventana-emergente-icono ventana-emergente-icono-exito" icon="mdi:check-circle"/>
+          <icon-mdi-check-circle class="ventana-emergente-icono ventana-emergente-icono-exito"/>
           <h3>¡Excelente!</h3>
           <p>Se ha eliminado {{identEliminar}}.</p>
           <p class="mje-db">{{ mensaje }}</p>
@@ -80,7 +79,7 @@ defineEmits(['refrescar', 'eliminar', 'cerrarModal']);
         </div>
         <!-- No se borro por algun error -->
         <div v-else-if="estado ==='error'" class="ventana-emergente ventana-emergente-error">
-          <Icon class="ventana-emergente-icono ventana-emergente-icono-error" icon="mdi:close-circle"/>
+          <icon-mdi-close-circle class="ventana-emergente-icono ventana-emergente-icono-error"/>
           <h3>Hubo un problema</h3>
           <p>No se ha eliminado {{identEliminar}}.</p>
           <p class="mje-db">{{ mensaje }}</p>
@@ -109,11 +108,10 @@ defineEmits(['refrescar', 'eliminar', 'cerrarModal']);
     border: 1px solid #ccc;
     width: 25ch;
   }
-
-.mje-db {
-  border: 1px solid gray;
-  font-size: 0.7;
-  color: gray;
-  padding: 0.5rem;
-}
+  .mje-db {
+    border: 1px solid gray;
+    font-size: 0.7;
+    color: gray;
+    padding: 0.5rem;
+  }
 </style>

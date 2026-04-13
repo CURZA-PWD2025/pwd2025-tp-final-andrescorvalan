@@ -34,9 +34,10 @@ class AtencionModel:
     # Métodos de serialización y deserialización.
     #--------------------------------------------------------------------------------------------------------
     def serializar(self) -> dict:
+        fecha_str = self.fecha.isoformat() if isinstance(self.fecha, date) else self.fecha
         return {
             "id": self.id,
-            "fecha": self.fecha,
+            "fecha": fecha_str,
             "diagnostico": self.diagnostico,
             "tratamiento": self.tratamiento,
             "observaciones": self.observaciones,
@@ -95,7 +96,7 @@ class AtencionModel:
                 )
             return listado
         except DBException:
-            print(f"DEBUG - {AtencionModel.PREFIX} (getl_all):")
+            print(f"DEBUG - {AtencionModel.PREFIX} (get_all):")
             raise ModelException(
                 "No se pudo obtener el listado de atenciones. El Sistema " \
                 "Gestor de Base de Datos esta fuera de servicio o la BD/Tabla no existe."

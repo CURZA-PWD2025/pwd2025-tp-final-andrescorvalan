@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { toRefs, onMounted, ref, computed } from 'vue'
-  import { Icon } from "@iconify/vue"
   import { recargarBD } from '@/router'
 
   import ListViewGenerico from '@/components//crud-generico/ListViewGenerico.vue'
@@ -71,19 +70,20 @@
   >
     <template #buscador>
       <div class="buscador-wrapper">
-        <Icon icon="mdi:magnify" class="icono-busqueda" />
+        <icon-mdi-magnify class="icono-busqueda"/>
         <input 
           v-model="filtro" 
           type="text" 
           placeholder="Buscar por nombre, propietario ..." 
           class="input-busqueda"
+          title="Buscar por fecha, nombre de mascota, nombre o apellido del propietario, nombre o apellido del veterinario o diagnóstico"
         />
       </div>
     </template>
 
     <template #botonera>
       <router-link class="boton boton-add" :to="{ name: 'atenciones_create' }">
-      <Icon class="icono" icon="mdi:add"/>
+      <icon-mdi-add class="icono"/>
       Agregar
     </router-link>
     </template>
@@ -113,11 +113,11 @@
     
         <div class="crud-botones">
           <router-link class="boton boton-show" :to="{ name: 'atenciones_show', params: { id: atencion.id } }">
-            <Icon class="icono" icon="mdi:eye"/>
+            <icon-mdi-eye class="icono"/>
             Mostrar
           </router-link>
           <router-link class="boton boton-edit" :to="{ name: 'atenciones_update', params: { id: atencion.id } }">
-            <Icon class="icono" icon="mdi:edit"/>
+            <icon-mdi-edit class="icono"/>
             Editar
           </router-link>
           <button class="boton boton-delete" 
@@ -126,7 +126,7 @@
               `la atención de ${atencion.mascota.nombre} del dia ${formatearFecha(atencion.fecha)}`
               )"
           >
-            <Icon class="icono" icon="mdi:delete"/>
+            <icon-mdi-delete class="icono"/>
             Eliminar
           </button>
         </div>

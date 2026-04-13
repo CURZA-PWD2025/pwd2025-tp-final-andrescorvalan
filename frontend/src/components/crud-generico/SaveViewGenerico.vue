@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from "@iconify/vue"
 
 // Props para recibir datos del padre
 defineProps(['titulo', 'estado', 'mensaje', 'mostrarModal']);
@@ -14,17 +13,21 @@ defineEmits(['volver', 'submit', 'reset', 'cerrarModal']);
         {{ titulo }}
       </h2>
       <button @click="$emit('volver')" class="boton boton-back" type="button">
-        <Icon class="icono" icon="mdi:arrow-left"/>
+        <icon-mdi-arrow-left class="icono" />
         Volver
       </button>
     </header>
     <!-- Ventana para mostrar un mensaje de procesamiento y su resultado (exito, error) -->
     <div v-if="mostrarModal" class="deshabilitar-interaccion">
       <div class="ventana-emergente" :class="estado === 'exito' ? 'ventana-emergente-exito' : 'ventana-emergente-error'">
-        <Icon class="ventana-emergente-icono"
-          :class="estado === 'exito' ? 'ventana-emergente-icono-exito' : 'ventana-emergente-icono-error'"
-          :icon="estado === 'exito' ? 'mdi:check-circle' : 'mdi:alert-circle'" 
-        />
+
+        <div v-if="estado === 'exito'" class="ventana-emergente-icono" >
+          <icon-mdi-check-circle class="ventana-emergente-icono-exito"/>
+        </div> 
+        <div v-else class="ventana-emergente-icono">
+          <icon-mdi-check-circle class="ventana-emergente-icono-error"/>
+        </div> 
+         
         <h3>{{ estado === 'exito' ? '¡Excelente!' : 'Hubo un problema' }}</h3>
         <p>{{ mensaje }}</p>
         <button @click="$emit('cerrarModal')" class="boton boton-accept" style="width: 100%;" type="button">
@@ -46,7 +49,7 @@ defineEmits(['volver', 'submit', 'reset', 'cerrarModal']);
       <!-- Botones del formulario -->
       <div class="crud-botones">
         <button class="boton boton-accept" type="submit" :disabled="estado === 'procesando'">
-          <Icon class="icono" icon="mdi:content-save-plus"/>
+          <icon-mdi-content-save-plus class="icono"/>
           <p v-if="estado === 'procesando'">
             'Guardando...'
           </p>
@@ -55,7 +58,7 @@ defineEmits(['volver', 'submit', 'reset', 'cerrarModal']);
           </p>
         </button>
         <button class="boton boton-reset" type="button" @click="$emit('reset')" :disabled="estado === 'procesando'">
-          <Icon class="icono" icon="mdi:broom"/>
+          <icon-mdi-broom class="icono"/>
           Anular
         </button>
       </div>

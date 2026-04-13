@@ -9,6 +9,8 @@ import mascotas_routes from './mascotas_routes'
 import especialidades_routes from './especialidades_routes'
 import veternarios_routes from './veterinarios_routes'
 import atenciones_routes from './atenciones_routes'
+import turnos_routes from './turnos_routes'
+
 
 
 const routes = [
@@ -23,6 +25,7 @@ const routes = [
   ...especialidades_routes,
   ...veternarios_routes,
   ...atenciones_routes,
+  ...turnos_routes,
   {
     path: '/admin_db',
     name: 'admin_db',
@@ -50,10 +53,8 @@ router.beforeEach((to, from) => {
   } else {
     //para intentar detectar falla de q recargarBD pasaba misteriosamente a false
     console.log(`Navegación interna en ${entidadActual}`)
-
     // recargarBD.value = false; <- posible culpable de la falla de no leer BD cdo debia
   }
-  console.log(`Navegando aRecargar BD: ${recargarBD.value}`);
 });
 
 export default router

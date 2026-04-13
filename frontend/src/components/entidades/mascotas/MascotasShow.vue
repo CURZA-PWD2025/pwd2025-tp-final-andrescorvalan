@@ -1,6 +1,5 @@
 | <script setup lang="ts">
   import { ref, toRefs, onMounted } from 'vue'
-  import { Icon } from "@iconify/vue"
   
   import { useRoute, useRouter } from 'vue-router'
   const router = useRouter()
@@ -43,7 +42,7 @@
     @volver="router.push({ name: 'mascotas_list' })">
     <template #detalles v-if="mascota.id !== 0">
       <header class="ficha-encabezado">
-        <Icon icon="mdi:paw" class="ficha-logo" />
+        <icon-mdi-paw class="ficha-logo" />
         <div>
           <h2>{{ mascota.nombre }}</h2>
           <p>ID: {{ mascota.id }}</p>
@@ -54,7 +53,7 @@
       <div class="ficha-detalles">
         <section class="ficha-tarjeta">  
           <div class="ficha-tarjeta-titulo">
-            <Icon icon="mdi:account" /> Datos del Propietario
+            <icon-mdi-account/> Datos del Propietario
           </div>
           <div class="card-body">
             <div class="ficha-tarjeta-fila">
@@ -77,7 +76,7 @@
         </section>
         <section class="ficha-tarjeta">
           <div class="ficha-tarjeta-titulo">
-            <Icon icon="mdi:cat" /> Información de Especie
+            <icon-mdi-cat/> Información de Especie
           </div>
           <div class="card-body">
             <div class="ficha-tarjeta-fila">

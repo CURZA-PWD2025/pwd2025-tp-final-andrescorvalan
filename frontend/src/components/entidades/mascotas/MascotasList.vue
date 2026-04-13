@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { toRefs, onMounted, ref, computed } from 'vue'
-  import { Icon } from "@iconify/vue"
   import { recargarBD } from '@/router'
 
   import AtencionesByMascota from '@/components/entidades/atenciones/AtencionesByMascota.vue'
@@ -67,19 +66,20 @@
   >
     <template #buscador>
       <div class="buscador-wrapper">
-        <Icon icon="mdi:magnify" class="icono-busqueda" />
+        <icon-mdi-magnify class="icono-busqueda"/>
         <input 
           v-model="filtro" 
           type="text" 
           placeholder="Buscar por nombre, propietario ..." 
           class="input-busqueda"
+          title="Buscar por nombre de mascota, nombre o apellido del propietario"
         />
       </div>
     </template>
 
     <template #botonera>
       <router-link class="boton boton-add" :to="{ name: 'mascotas_create' }">
-      <Icon class="icono" icon="mdi:add"/>
+      <icon-mdi-add class="icono"/>
       Agregar
     </router-link>
     </template>
@@ -125,11 +125,11 @@
 
         <div class="crud-botones">
           <router-link class="boton boton-show" :to="{ name: 'mascotas_show', params: { id: mascota.id } }">
-            <Icon class="icono" icon="mdi:eye"/>
+            <icon-mdi-eye class="icono"/>
             Mostrar
           </router-link>
           <router-link class="boton boton-edit" :to="{ name: 'mascotas_update', params: { id: mascota.id } }">
-            <Icon class="icono" icon="mdi:edit"/>
+            <icon-mdi-edit class="icono"/>
             Editar
           </router-link>
           <button class="boton boton-delete" 
@@ -140,7 +140,7 @@
                 )"
             >
         
-            <Icon class="icono" icon="mdi:delete"/>
+            <icon-mdi-delete class="icono"/>
             Eliminar
           </button>
         </div>

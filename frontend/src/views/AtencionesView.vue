@@ -1,18 +1,5 @@
-<script setup lang="ts">
-  import { useRouter, useRoute } from 'vue-router'
-  import { onMounted } from 'vue'
-
-  const router = useRouter()
-  const route = useRoute()
-
-  onMounted(() => {
-    if (route.name === 'atenciones') {
-      router.push({ name: 'atenciones_list' })
-    } 
-  })
-</script>
-
 <template>
+  <h1>Administración de atenciones</h1>
   <router-view />
 </template>
 

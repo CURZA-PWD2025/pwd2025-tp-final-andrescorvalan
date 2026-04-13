@@ -30,10 +30,11 @@ class MascotaModel:
     # Métodos de serialización y deserialización.
     #--------------------------------------------------------------------------------------------------------
     def serializar(self) -> dict:
+        fecha_str = self.fecha_nac.isoformat() if isinstance(self.fecha_nac, date) else self.fecha_nac
         return {
             "id": self.id,
             "nombre": self.nombre,
-            "fecha_nac": self.fecha_nac,
+            "fecha_nac": fecha_str,
             "sexo": self.sexo,
             "propietario": self.propietario.serializar() if self.propietario else None,
             "especie": self.especie.serializar() if self.especie else None,

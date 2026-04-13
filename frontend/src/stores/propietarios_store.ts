@@ -2,6 +2,7 @@ import type { Propietario } from '@/interface/propietario'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
 
 const url = 'propietarios/'
 const defaultPropietario: Propietario = {
@@ -17,21 +18,25 @@ const usePropietariosStore = defineStore('propietarios', () => {
   const propietarios = ref<Array<Propietario>>([])
   const propietario = ref<Propietario>({ ...defaultPropietario })
 
-  async function buscar_propietario(id: number) {
-    const busqueda = propietarios.value.find((propietario) => propietario.id === id)
-    if (busqueda) {
-      propietario.value = { ...busqueda }
-      return { 
-        estado:'ok', 
-        objeto: propietario.value
+  async function buscar_propietario(id: number): Promise<ApiRespuesta> {
+      const encontrado = propietarios.value.find((propietario) => propietario.id === id)
+      if (encontrado) {
+        propietario.value = { ...encontrado }
+        return {
+          estado: 'ok',
+          mensaje: 'Encontrado localmente',
+          objeto: propietario.value
+        }
+      }
+      try {
+        const respuesta = await getOne(id) 
+        respuesta.objeto = respuesta.datos 
+        propietario.value = { ...respuesta.objeto }
+        return respuesta
+      } catch (error) {
+        throw error 
       }
     }
-    try {
-      return await getOne(id)
-    } catch (error) {
-      throw error 
-    }
-  }
 
   async function getAll() {
     try {
@@ -65,6 +70,7 @@ const usePropietariosStore = defineStore('propietarios', () => {
       const nuevoPropietario = respuesta.objeto
       propietarios.value.push({ ...nuevoPropietario })
       propietario.value = { ...nuevoPropietario }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -85,6 +91,7 @@ const usePropietariosStore = defineStore('propietarios', () => {
         propietarios.value[index] = { ...nuevoPropietario }
       }
       propietario.value = { ...nuevoPropietario }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -96,6 +103,7 @@ const usePropietariosStore = defineStore('propietarios', () => {
       const respuesta = await ApiService.destroy(url, id)
       propietarios.value = propietarios.value.filter(prop => prop.id !== id);    
       propietario.value = { ...defaultPropietario }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

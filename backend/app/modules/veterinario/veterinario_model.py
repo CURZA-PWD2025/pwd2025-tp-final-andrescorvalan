@@ -82,7 +82,8 @@ class VeterinarioModel:
             raise ModelException(
                 "No se pudo obtener el listado de veterinarios. El Sistema " \
                 "Gestor de Base de Datos esta fuera de servicio o la BD/Tabla no existe."
-            )    #--------------------------------------------------------------------------------------------------------
+            )   
+    #--------------------------------------------------------------------------------------------------------
     # Método estático para obtener un Veterinario por Id
     # Retorna:  - un diccionario con los datos si encontró el registro
     #           - {} si no encontró el registro

@@ -12,17 +12,13 @@ const { mensaje, estado, mostrarModal, saveEntidad, findEntidad, resetSaveLogicG
 import useVeterinariosStore from '@/stores/veterinarios_store'
 const { buscar_veterinario, update, defaultVeterinario } = useVeterinariosStore()
 
-
-
 import useEspecialidadesStore from '@/stores/especialidades_store'
-import axios from 'axios' 
 
 const { especialidades } = toRefs(useEspecialidadesStore())
 const { getAll: getall_especialidades } = useEspecialidadesStore()
 
 const editVeterinario = ref({ ...defaultVeterinario })
 const idsEspecialidades = ref<number[]>([])
-
 
 
 async function cargar_datos () {
@@ -157,14 +153,19 @@ async function modificar_veterinario() {
     <div class="crud-field-group">
       <fieldset class="crud-fieldset">
         <legend>Especialidades</legend>
-        <div v-for="esp in especialidades" :key="esp.id" class="crud-item-checkbox">
-          <input
-            type="checkbox"
-            :id="'esp' + esp.id"
-            :value="esp.id"
-            v-model="idsEspecialidades"
-          >
-          <label :for="'esp' + esp.id">{{ esp.nombre }}</label>
+        <div v-if="especialidades.length>0">
+          <div v-for="esp in especialidades" :key="esp.id" class="crud-item-checkbox">
+            <input
+              type="checkbox"
+              :id="'esp' + esp.id"
+              :value="esp.id"
+              v-model="idsEspecialidades"
+            >
+            <label :for="'esp' + esp.id">{{ esp.nombre }}</label>
+          </div>
+        </div>
+        <div v-else>
+          No hay especialidades cargadas.
         </div>
       </fieldset>
     </div>

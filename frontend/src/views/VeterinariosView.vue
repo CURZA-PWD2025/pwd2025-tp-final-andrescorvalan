@@ -1,20 +1,6 @@
-<script setup lang="ts">
-  import { useRouter, useRoute } from 'vue-router'
-  import { onMounted } from 'vue'
-
-  const router = useRouter()
-  const route = useRoute()
-
-  onMounted(() => {
-    if (route.name === 'veterinarios') {
-      router.push({ name: 'veterinarios_list' })
-    } 
-  })
-</script>
-
 <template>
+  <h1>Administración de veterinarios</h1>
   <router-view />
 </template>
-
 
 <style scoped></style>

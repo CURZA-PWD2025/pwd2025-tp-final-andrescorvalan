@@ -4,8 +4,6 @@
 @import "./css/crud.css";
 @import "./css/tarjetas.css";
 
-
-
 @font-face {
   font-family: 'Rubik App';
   src: url('./fonts/Rubik-VariableFont_wght.ttf') format('truetype');
@@ -28,33 +26,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-/* .main {
-  width: 100vw;
-  min-height: 100vh;
-} */
-/* nav {
-  background-color: #436ad3;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  width: 100%;
-  padding: 0.25rem; 
-  gap: 0.25rem; 
-  align-items: center; 
-  justify-content:space-between;
-  box-sizing: border-box;
-}
-nav img {
-  border: 0.1rem solid #CC7A00;
-  border-radius: 0.5rem;
-  height: 60px;
-  margin: 0.5rem 0.5rem 0.5rem auto;
-} */
-/* .router-link-active,
-.router-link-exact-active {
-  color: #E0E0E0;
-  background-color: #263299
-} */
 h1 {
   font-size: 1.8rem;
   font-weight: 900;
@@ -86,7 +57,6 @@ h4 {
   margin-bottom: 1rem;
   text-align: left;
 }
-
 a {
   text-decoration: none;
   color:unset;
@@ -132,6 +102,7 @@ a {
 .ventana-emergente-icono-error { color: #f44336; }
 
 .icono-procesando {
+  position: relative;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #0b7a8d;
   border-radius: 50%;
@@ -144,4 +115,3 @@ a {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-

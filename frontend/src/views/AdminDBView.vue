@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue'
-  import { Icon } from '@iconify/vue'
   import ApiService from '@/services/api_service'
 
   import useEspecialidadesStore from '../stores/especialidades_store'
@@ -61,6 +60,7 @@
     try {
       const data = await ApiService.execute(`/db/${comando.value}`)
       limpiarTodosLosStores()
+      console.log(data)
       mensaje.value = data.mensaje
       estado.value = 'exito'
     } catch (error: any) {
@@ -82,7 +82,7 @@
     <div class="crud-mensaje">
       <transition name="mensaje-fade" mode="out-in">
         <div v-if="mensaje" :key="mensaje" class="mensaje-alerta" :class="tipoMensaje">
-          <Icon v-if="estado === 'procesando'" icon="line-md:loading-twotone-loop" />
+          <div v-if="estado === 'procesando'" class="icono-procesando"></div>
           {{ mensaje }}
         </div>
       </transition>
@@ -95,7 +95,7 @@
           <p class="crud-data">Crea la base de datos "Veterinaria" y sus tablas (Propietarios, Mascotas, etc.) pero sin contenido.</p>
           <div class="crud-botones">
             <button @click="confirmarAccion('setup')" class="boton boton-add" :disabled="procesando">
-              <Icon class="icono" icon="mdi:table-plus" /> Crear/Vaciar Tablas
+              <icon-mdi-table-plus class="icono"/> Crear/Vaciar Tablas
             </button>
           </div>
         </div>
@@ -105,7 +105,7 @@
             Crea la base de datos "Veterinaria" e inserta registros de prueba para demostrar el funcionamiento del sistema.</p>
           <div class="crud-botones">
             <button @click="confirmarAccion('seed')" class="boton boton-accept" :disabled="procesando">
-              <Icon class="icono" icon="mdi:database-import" /> Crear BD y Cargar Datos
+              <icon-mdi-database-import class="icono"/> Crear BD y Cargar Datos
             </button>
           </div>
         </div>
@@ -114,7 +114,7 @@
           <p class="crud-data">Elimina toda la base de datos (tablas y datos).</p>
           <div class="crud-botones">
             <button @click="confirmarAccion('clear')" class="boton boton-delete" :disabled="procesando">
-              <Icon class="icono" icon="mdi:trash-can-outline" /> Borrar la Base de Datos
+              <icon-mdi-trash-can-outline class="icono"/> Borrar la Base de Datos
             </button>
           </div>
         </div>

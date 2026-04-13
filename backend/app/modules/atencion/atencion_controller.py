@@ -95,14 +95,16 @@ class AtencionController:
                 }
        # Verificar la fecha.
         try:
-            datetime.datetime.strptime(data["fecha"], "%Y-%m-%d")
+            datetime.datetime.strptime(str(data["fecha"]), "%Y-%m-%d")
         except ValueError:
             return {
                 'estado': 'error',
                 'mensaje': 'La fecha no es válida o tiene un formato incorrecto.'
             }
         return {}
-
+    #--------------------------------------------------------------------------------------------------------
+    # Método estático para crear una atencion.
+    #--------------------------------------------------------------------------------------------------------
     @staticmethod
     def create(data: dict) -> dict:
         # Verficar data.

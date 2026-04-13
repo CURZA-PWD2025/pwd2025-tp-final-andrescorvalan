@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { toRefs, onMounted, ref, computed } from 'vue'
-  import { Icon } from "@iconify/vue"
   import { recargarBD } from '@/router'
 
   import ListViewGenerico from '@/components//crud-generico/ListViewGenerico.vue'
@@ -62,21 +61,22 @@
   >
     <template #buscador>
       <div class="buscador-wrapper">
-        <Icon icon="mdi:magnify" class="icono-busqueda" />
+        <icon-mdi-magnify class="icono-busqueda"/>
         <input 
           v-model="filtro" 
           type="text" 
           placeholder="Nombre, apellido o teléfono  ." 
           class="input-busqueda"
+          title="Buscar por nombre, apellido o teléfono del propietario"
         />
       </div>
     </template>
 
     <template #botonera>
       <router-link class="boton boton-add" :to="{ name: 'propietarios_create' }">
-      <Icon class="icono" icon="mdi:add"/>
+      <icon-mdi-add class="icono"/>
       Agregar
-    </router-link>
+      </router-link>
     </template>
 
     <template #listado>
@@ -92,11 +92,11 @@
         </dl>
         <div class="crud-botones">
           <router-link class="boton boton-show" :to="{ name: 'propietarios_show', params: { id: propietario.id } }">
-            <Icon class="icono" icon="mdi:eye"/>
+            <icon-mdi-eye class="icono"/>
             Mostrar
           </router-link>
           <router-link class="boton boton-edit" :to="{ name: 'propietarios_update', params: { id: propietario.id } }">
-            <Icon class="icono" icon="mdi:edit"/>
+            <icon-mdi-edit class="icono"/>
             Editar
           </router-link>
           
@@ -106,7 +106,7 @@
               `al propietario/a ${propietario.nombre} ${propietario.apellido}`
             )"
           >
-            <Icon class="icono" icon="mdi:delete"/>
+            <icon-mdi-delete class="icono"/>
             Eliminar
           </button>
         </div>

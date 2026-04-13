@@ -1,4 +1,5 @@
 import mysql.connector
+from mysql.connector import pooling
 from .erroresBD import DBException,DBErrorData
 import os
 from dotenv import load_dotenv
@@ -10,21 +11,40 @@ load_dotenv()
 # autocommit=True
 #------------------------------------------------------------------------------------------------------------------------
 class OperarBD:
+    _pool = None
+    @staticmethod
+    def _get_pool():
+        if OperarBD._pool is None:
+            try:
+                OperarBD._pool = pooling.MySQLConnectionPool(
+                    pool_name="mi_pool_veterinaria",
+                    pool_size=10, 
+                    user=os.getenv('DB_USER'),
+                    password=os.getenv('DB_PASSWORD'),
+                    database=os.getenv('DB_NAME'),
+                    host=os.getenv('DB_HOST'),
+                    port=os.getenv('DB_PORT'),
+                    autocommit=True
+                )
+            except mysql.connector.Error as e:
+                raise DBException(f'Error al crear el Pool: {e}')
+        return OperarBD._pool
     #--------------------------------------------------------------------------------------------------------
     # Método estático para obtener una conexión a la bd, con autocommit=True
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
     def get_connect():
         try:
-            conn = mysql.connector.connect(
-                user = os.getenv('DB_USER'),
-                password = os.getenv('DB_PASSWORD'),
-                database = os.getenv('DB_NAME'),
-                host = os.getenv('DB_HOST'),
-                port = os.getenv('DB_PORT'),
-                autocommit = True,            
-            )
-            return conn
+            return OperarBD._get_pool().get_connection()
+            # conn = mysql.connector.connect(
+            #     user = os.getenv('DB_USER'),
+            #     password = os.getenv('DB_PASSWORD'),
+            #     database = os.getenv('DB_NAME'),
+            #     host = os.getenv('DB_HOST'),
+            #     port = os.getenv('DB_PORT'),
+            #     autocommit = True,            
+            # )
+            # return conn
         except mysql.connector.Error as e:
             raise DBException(f'DB: Exception en OperarBD.get_connect. {e}')
     #--------------------------------------------------------------------------------------------------------

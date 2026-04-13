@@ -1,8 +1,8 @@
 const atenciones_routes = [
   {
     path: '/atenciones',
-    name: 'atenciones',
     component: () => import('@/views/AtencionesView.vue'),
+    redirect: { name: 'atenciones_list' },
     children: [
       {
         path: '',

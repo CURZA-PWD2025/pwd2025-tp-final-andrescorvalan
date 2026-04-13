@@ -2,6 +2,7 @@ import type { Atencion } from '@/interface/atencion'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
 
 const url = 'atenciones/'
 
@@ -35,21 +36,25 @@ const useAtencionesStore = defineStore('atenciones', () => {
   const atenciones = ref<Array<Atencion>>([])
   const atencion = ref<Atencion>({ ...defaultAtencion })
 
-  async function buscar_atencion(id: number) {
-    const busqueda = atenciones.value.find((atencion) => atencion.id === id)
-    if (busqueda) {
-      atencion.value = { ...busqueda }
-      return { 
-        estado:'ok', 
-        objeto: atencion.value
+  async function buscar_atencion(id: number): Promise<ApiRespuesta> {
+      const encontrado = atenciones.value.find((atencion) => atencion.id === id)
+      if (encontrado) {
+        atencion.value = { ...encontrado }
+        return {
+          estado: 'ok',
+          mensaje: 'Encontrado localmente',
+          objeto: atencion.value
+        }
+      }
+      try {
+        const respuesta = await getOne(id) 
+        respuesta.objeto = respuesta.datos 
+        atencion.value = { ...respuesta.objeto }
+        return respuesta
+      } catch (error) {
+        throw error 
       }
     }
-    try {
-      return await getOne(id)
-    } catch (error) {
-      throw error 
-    }
-  }
 
   async function getAll() {
     try {
@@ -101,8 +106,9 @@ const useAtencionesStore = defineStore('atenciones', () => {
         }
       )
       const nuevaAtencion = respuesta.objeto
-      atenciones.value.push({ ...nuevaAtencion })
+      atenciones.value.unshift({ ...nuevaAtencion })
       atencion.value = { ...nuevaAtencion }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -133,6 +139,7 @@ const useAtencionesStore = defineStore('atenciones', () => {
         atenciones.value[index] = { ...nuevaAtencion }
       }
       atencion.value = { ...nuevaAtencion }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -144,6 +151,7 @@ const useAtencionesStore = defineStore('atenciones', () => {
       const respuesta = await ApiService.destroy(url, id)
       atenciones.value = atenciones.value.filter(masc => masc.id !== id);    
       atencion.value = { ...defaultAtencion }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

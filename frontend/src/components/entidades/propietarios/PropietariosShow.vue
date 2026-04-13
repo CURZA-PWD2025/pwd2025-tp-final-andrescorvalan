@@ -1,6 +1,5 @@
 | <script setup lang="ts">
   import { ref, toRefs, onMounted } from 'vue'
-  import { Icon } from "@iconify/vue"
   
   import { useRoute, useRouter } from 'vue-router'
   const router = useRouter()
@@ -36,7 +35,7 @@
     @volver="router.push({ name: 'propietarios_list' })">
     <template #detalles v-if="propietario.id !== 0">
       <header class="ficha-encabezado">
-        <Icon icon="mdi:account-group" class="ficha-logo" />
+        <icon-mdi-account-group class="ficha-logo" />
         <div>
           <h2>{{ propietario.nombre }} {{ propietario.apellido }} </h2>
           <p>ID: {{ propietario.id }}</p>

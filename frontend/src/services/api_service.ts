@@ -1,11 +1,9 @@
 import { instance as axios } from '@/plugins/axios'
 
 class ApiService {
-  /**
-   * Simula una latencia para pruebas de UI (Loading states)
-   */
+
   private static async simulateDelay() {
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    //await new Promise(resolve => setTimeout(resolve, 1000))
   }
 
   static async getAll(url: string) {
@@ -20,6 +18,7 @@ class ApiService {
         mensaje: data?.mensaje || 'Error desconocido al obtener el listado.' 
       }
     } catch (error: any) {
+      console.log(error)
       // Si el error ya tiene nuestro formato (fue lanzado por el throw de arriba)
       if (error.estado) throw error;
 
@@ -149,6 +148,27 @@ class ApiService {
       }
     }
   }
+
+  // static async getProximosTurnos(url: string) {
+  //   try {
+  //     await ApiService.simulateDelay() 
+  //     const { data } = await axios.get(`${url}`)
+      
+  //     if (data && data.estado === 'ok') return data
+
+  //     throw { 
+  //       estado: data?.estado || 'error', 
+  //       mensaje: data?.mensaje || 'No se encontró información sobre los proximos turnos.' 
+  //     }
+  //   } catch (error: any) {
+  //     if (error.estado) throw error;
+  //     throw {
+  //       estado: error.response?.data?.estado || 'exception',
+  //       mensaje: error.response?.data?.mensaje || 'Error al obtener el listado filtrado.'
+  //     }
+  //   }
+  // }
+
 }
 
 export default ApiService;

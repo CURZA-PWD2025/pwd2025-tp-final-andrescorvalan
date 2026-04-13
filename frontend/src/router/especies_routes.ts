@@ -1,8 +1,8 @@
 const especies_routes = [
   {
     path: '/especies',
-    name: 'especies',
     component: () => import('@/views/EspeciesView.vue'),
+    redirect: { name: 'especies_list' },
     children: [
       {
         path: '',

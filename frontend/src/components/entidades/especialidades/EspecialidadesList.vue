@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { toRefs, onMounted, ref, computed } from 'vue'
-  import { Icon } from "@iconify/vue"
   import { recargarBD } from '@/router'
 
   import ListViewGenerico from '@/components/crud-generico/ListViewGenerico.vue'
@@ -60,19 +59,20 @@
   >
    <template #buscador>
       <div class="buscador-wrapper">
-        <Icon icon="mdi:magnify" class="icono-busqueda" />
+        <icon-mdi-magnify class="icono-busqueda"/>
         <input 
           v-model="filtro" 
           type="text" 
           placeholder="Buscar por nombre o descripción." 
           class="input-busqueda"
+          title="Buscar por nombre o descripción de la especialidad"
         />
       </div>
     </template>
 
     <template #botonera>
       <router-link class="boton boton-add" :to="{ name: 'especialidades_create' }">
-      <Icon class="icono" icon="mdi:add"/>
+      <icon-mdi-add class="icono"/>
       Agregar
     </router-link>
     </template>
@@ -89,11 +89,11 @@
 
         <div class="crud-botones">
           <router-link class="boton boton-show" :to="{ name: 'especialidades_show', params: { id: especialidad.id } }">
-            <Icon class="icono" icon="mdi:eye"/>
+            <icon-mdi-eye class="icono"/>
             Mostrar
           </router-link>
           <router-link class="boton boton-edit" :to="{ name: 'especialidades_update', params: { id: especialidad.id } }">
-            <Icon class="icono" icon="mdi:edit"/>
+            <icon-mdi-edit class="icono"/>
             Editar
           </router-link>
           <button class="boton boton-delete" 
@@ -102,7 +102,7 @@
               `la especialidad ${especialidad.nombre}`
               )"
           >
-            <Icon class="icono" icon="mdi:delete"/>
+            <icon-mdi-delete class="icono"/>
             Eliminar
           </button>
         </div>

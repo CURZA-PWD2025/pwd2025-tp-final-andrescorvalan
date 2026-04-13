@@ -1,8 +1,8 @@
 const mascotas_routes = [
   {
     path: '/mascotas',
-    name: 'mascotas',
     component: () => import('@/views/MascotasView.vue'),
+    redirect: { name: 'mascotas_list' },
     children: [
       {
         path: '',

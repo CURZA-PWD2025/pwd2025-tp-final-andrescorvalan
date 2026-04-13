@@ -2,6 +2,7 @@ import type { Especie } from '@/interface/especie'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import ApiService from '@/services/api_service'
+import type { ApiRespuesta } from '@/interface/api_respuesta'
 
 const url = 'especies/'
 const defaultEspecie: Especie = {
@@ -17,20 +18,24 @@ const useEspeciesStore = defineStore('especies', () => {
   const especies = ref<Array<Especie>>([])
   const especie = ref<Especie>({ ...defaultEspecie })
 
-  async function buscar_especie(id: number) {
-    const busqueda = especies.value.find((esp) => esp.id === id)
-    if (busqueda) {
-      especie.value = { ...busqueda }
-      return { 
-        estado:'ok', 
+  async function buscar_especie(id: number): Promise<ApiRespuesta> {
+    const encontrado = especies.value.find((especie) => especie.id === id)
+    if (encontrado) {
+      especie.value = { ...encontrado }
+      return {
+        estado: 'ok',
+        mensaje: 'Encontrado localmente',
         objeto: especie.value
       }
     }
     try {
-      return await getOne(id)
-      } catch (error) {
-        throw error 
-      }
+      const respuesta = await getOne(id) 
+      respuesta.objeto = respuesta.datos 
+      especie.value = { ...respuesta.objeto }
+      return respuesta
+    } catch (error) {
+      throw error 
+    }
   }
 
   async function getAll() {
@@ -65,6 +70,7 @@ const useEspeciesStore = defineStore('especies', () => {
       const nuevaEspecie = respuesta.objeto
       especies.value.push({ ...nuevaEspecie })
       especie.value = { ...nuevaEspecie }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -85,6 +91,7 @@ const useEspeciesStore = defineStore('especies', () => {
         especies.value[index] = { ...nuevaEspecie }
       }
       especie.value = { ...nuevaEspecie }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error
@@ -96,6 +103,7 @@ const useEspeciesStore = defineStore('especies', () => {
       const respuesta = await ApiService.destroy(url, id)
       especies.value = especies.value.filter(esp => esp.id !== id);    
       especie.value = { ...defaultEspecie }
+      await getAll()
       return respuesta
     } catch (error: any) {
       throw error

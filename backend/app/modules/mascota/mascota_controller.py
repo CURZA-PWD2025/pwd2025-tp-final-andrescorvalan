@@ -79,7 +79,7 @@ class MascotaController:
                 }
        # Verificar la fecha.
         try:
-            datetime.datetime.strptime(data["fecha_nac"], "%Y-%m-%d")
+            datetime.datetime.strptime(str(data["fecha_nac"]), "%Y-%m-%d")
         except ValueError:
             return {
                 'estado': 'error',
@@ -110,7 +110,7 @@ class MascotaController:
                 data_completo["especie"] = EspecieModel.get_one(mascota.especie.id)
                 return {
                     'estado': 'ok',
-                    'mensaje': 'Especie creada con éxito.',
+                    'mensaje': 'Mascota creada con éxito.',
                     'objeto': data_completo
                 }
             #else

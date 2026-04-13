@@ -11,4 +11,4 @@ done
 
 echo "--- 2. Conexión establecida. Iniciando Servidor API ---"
 
-exec gunicorn --bind 0.0.0.0:5000 run:app
+exec gunicorn --bind 0.0.0.0:5000 --timeout 120 run:app

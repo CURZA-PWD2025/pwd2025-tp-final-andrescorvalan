@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import { ref, toRefs, onMounted } from 'vue'
-  import { Icon } from "@iconify/vue"
   
   import { useRoute, useRouter } from 'vue-router'
   const router = useRouter()
@@ -44,7 +43,7 @@
   >
     <template #detalles v-if="atencion.id !== 0">
       <header class="ficha-encabezado">
-        <Icon icon="mdi:medical-bag" class="ficha-logo" />
+        <icon-mdi-medical-bag class="ficha-logo" />
         <div>
           <h2>Datos de la Atención Veterinaria</h2>
           <p>ID: {{ atencion.id }}</p>
@@ -59,7 +58,7 @@
       <div class="ficha-detalles">
         <section class="ficha-tarjeta">
           <div class="ficha-tarjeta-titulo">
-            <Icon icon="mdi:paw" /> Información de la Mascora
+            <icon-mdi-paw /> Información de la Mascota
           </div>
           <div class="card-body">
             <div class="ficha-tarjeta-fila">
@@ -90,7 +89,7 @@
         </section>
         <section class="ficha-tarjeta">  
           <div class="ficha-tarjeta-titulo">
-            <Icon icon="mdi:account-group" /> Datos del Propietario
+            <icon-mdi-account-group/> Datos del Propietario
           </div>
           <div class="card-body">
             <div class="ficha-tarjeta-fila">
@@ -114,7 +113,7 @@
         
         <section class="ficha-tarjeta">  
           <div class="ficha-tarjeta-titulo">
-            <Icon icon="mdi:doctor" /> Datos del Veterinario
+            <icon-mdi-doctor/> Datos del Veterinario
           </div>
           <div class="card-body">
             <div class="ficha-tarjeta-fila">

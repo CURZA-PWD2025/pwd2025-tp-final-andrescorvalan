@@ -1,6 +1,5 @@
 | <script setup lang="ts">
   import { ref, toRefs, onMounted } from 'vue'
-  import { Icon } from "@iconify/vue"
 
   import { useRoute, useRouter } from 'vue-router'
   const router = useRouter()
@@ -36,7 +35,7 @@
   @volver="router.push({ name: 'especies_list' })">
     <template #detalles v-if="especie.id !== 0">
       <header class="ficha-encabezado">
-        <Icon icon="mdi:cat" class="ficha-logo" />
+        <icon-mdi-cat class="ficha-logo"/>
         <div>
           <h2>{{ especie.nombre }}</h2>
           <p>ID: {{ especie.id }}</p>

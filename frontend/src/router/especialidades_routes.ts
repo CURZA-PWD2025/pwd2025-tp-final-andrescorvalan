@@ -1,8 +1,8 @@
 const especialidades_routes = [
   {
     path: '/especialidades',
-    name: 'especialidades',
     component: () => import('@/views/EspecialidadesView.vue'),
+    redirect: { name: 'especialidades_list' },
     children: [
       {
         path: '',
