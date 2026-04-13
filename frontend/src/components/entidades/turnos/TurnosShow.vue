@@ -147,7 +147,7 @@
             <div class="ficha-tarjeta-fila">
               <span>Especialidades:</span>
               <strong v-if="turno.veterinario.especialidades.length > 0">
-                {{ (turno.veterinario.especialidades as Especialidad[]).map(e => e.nombre).join(' ') }}
+                {{ (turno.veterinario.especialidades as Especialidad[]).map(e => e.nombre).join(', ') }}
               </strong>
               <strong v-else>
                 Sin especialidades asignadas.

@@ -70,6 +70,7 @@
     if (!idMascota.value || !idVeterinario.value || !seleccionTmp.value) {
       mensaje.value = 'Faltan datos: Veterinario, Mascota o Selección de Horario.'
       estado.value = 'error'
+      mostrarModal.value = true
       return
     }
 
@@ -106,20 +107,43 @@
   >
     <div class="crud-field-group">
       <div class="crud-field">
-        <label class="crud-field-name">Veterinario: <abbr>*</abbr></label>
-        <select class="crud-input crud-data" v-model="idVeterinario" style="width: 30ch;">
-          <option value="0" disabled>Seleccione profesional</option>
+        <label class="crud-field-name" for="veterinario">
+          Veterinario:
+          <abbr class="crud-abbr" 
+            title="Veterinario asignado (obligatorio)">*
+          </abbr>
+        </label>
+        <select class="crud-input crud-data" 
+          id="veterinario"
+          v-model="idVeterinario" 
+          style="width: 30ch;"
+          required>
+          <option value="" disabled>
+            Seleccione un veterinario
+          </option>
           <option v-for="v in veterinarios" :key="v.id" :value="v.id">
             {{ v.apellido }}, {{ v.nombre }}
           </option>
         </select>
       </div>
+
       <div class="crud-field">
-        <label class="crud-field-name">Mascota: <abbr>*</abbr></label>
-        <select class="crud-input crud-data" v-model="idMascota" style="width: 30ch;">
-          <option value="0" disabled>Seleccione mascota</option>
-          <option v-for="m in mascotas" :key="m.id" :value="m.id">
-            {{ m.nombre }} ({{ m.propietario.apellido }})
+        <label class="crud-field-name" for="mascota">
+          Mascota:
+          <abbr class="crud-abbr" 
+            title="Mascota asignada (obligatorio)">*
+          </abbr>
+        </label>
+        <select class="crud-input crud-data" 
+          id="mascota"
+          v-model="idMascota" 
+          style="width: 30ch;"
+          required>
+          <option value="" disabled>
+            Seleccione una mascota
+          </option>
+          <option v-for="v in mascotas" :key="v.id" :value="v.id">
+            {{ v.nombre }}
           </option>
         </select>
       </div>

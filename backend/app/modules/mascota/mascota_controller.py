@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from .mascota_model import MascotaModel, ModelException
 from ..propietario.propietario_model import PropietarioModel
 from ..especie.especie_model import EspecieModel
@@ -79,7 +79,13 @@ class MascotaController:
                 }
        # Verificar la fecha.
         try:
-            datetime.datetime.strptime(str(data["fecha_nac"]), "%Y-%m-%d")
+            fecha_nac = datetime.strptime(data['fecha_nac'], "%Y-%m-%d")
+            ahora = datetime.now()
+            if fecha_nac > ahora: 
+                return {
+                    'estado': 'error', 
+                    'mensaje': 'La fecha de nacimiento no puede ser futura.'
+                }
         except ValueError:
             return {
                 'estado': 'error',

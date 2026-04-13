@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRefs } from 'vue'
+import { onMounted, ref, toRefs, computed } from 'vue'
 
 import { useRoute, useRouter } from 'vue-router'
 const router = useRouter()
@@ -58,6 +58,15 @@ async function modificar_atencion() {
     () => update(editAtencion.value),
   )
 }
+
+const today = computed(() => {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}`
+});
 </script>
 
 <template>
@@ -85,7 +94,8 @@ async function modificar_atencion() {
           v-model="editAtencion.fecha"
           style="width: 15ch;"
           autofocus
-          required/>
+          required
+          :max="today"/>
       </div>
     </div>
      <div class="crud-field-group">

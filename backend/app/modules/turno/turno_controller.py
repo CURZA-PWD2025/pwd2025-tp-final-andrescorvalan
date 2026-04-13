@@ -106,9 +106,10 @@ class TurnoController:
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
     def verificar_data(data: dict, es_nuevo: bool = True) -> dict:
-
+        if 'motivo' not in data or not str(data['motivo']).strip():
+            data['motivo'] = 'Consulta general'
         # Verificar existencia de la fecha-hora y el motivo.
-        for campo in ['fecha_hora', 'motivo']:
+        for campo in ['fecha_hora']:
             if campo not in data or data[campo] is None or not str(data[campo]).strip():
                 return {
                     'estado': 'error', 

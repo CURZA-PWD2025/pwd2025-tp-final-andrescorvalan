@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRefs, onMounted } from 'vue'
+import { ref, toRefs, onMounted, computed } from 'vue'
 
 import { useRouter } from 'vue-router'
 const router = useRouter()
@@ -49,6 +49,14 @@ async function nueva_mascota() {
     idPropietario.value = 0
   }
 }
+const today = computed(() => {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  
+  return `${year}-${month}-${day}`
+});
 </script>
 
 <template>
@@ -92,7 +100,8 @@ async function nueva_mascota() {
           type="date"
           v-model="newMascota.fecha_nac"
           style="width: 30ch;"
-          required/>
+          required
+          :max="today"/>
       </div>
       <div class="crud-field"> 
         <label class="crud-field-name" for="sexo">

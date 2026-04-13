@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from .atencion_model import AtencionModel, ModelException
 from ..mascota.mascota_model import MascotaModel
 from ..veterinario.veterinario_model import VeterinarioModel
@@ -74,7 +74,7 @@ class AtencionController:
     #--------------------------------------------------------------------------------------------------------
     @staticmethod
     def verificar_data(data: dict) -> dict:
-        # Verificar existencia de la fecha de nacimiento.
+        # Verificar existencia de la fecha.
         for campo in ['fecha', 'diagnostico', 'tratamiento']:
             if campo not in data or data[campo] is None or not str(data[campo]).strip():
                 return {
@@ -95,7 +95,13 @@ class AtencionController:
                 }
        # Verificar la fecha.
         try:
-            datetime.datetime.strptime(str(data["fecha"]), "%Y-%m-%d")
+            fecha_atencion = datetime.strptime(str(data["fecha"]), "%Y-%m-%d")
+            ahora = datetime.now()
+            if fecha_atencion > ahora:
+                return {
+                    'estado': 'error',
+                    'mensaje': 'La fecha de la atención no puede ser futura.'
+                }
         except ValueError:
             return {
                 'estado': 'error',

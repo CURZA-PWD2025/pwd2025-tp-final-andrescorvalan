@@ -8,7 +8,7 @@
   import useVeterinariosStore from '../stores/veterinarios_store'
   import useMascotasStore from '../stores/mascotas_store'
   import useAtencionesStore from '../stores/atenciones_store'
-
+  import useTurnosStore from '@/stores/turnos_store'
 
   const especialidadStore = useEspecialidadesStore()
   const mascotaStore = useMascotasStore()
@@ -16,7 +16,7 @@
   const propietarioStore = usePropietariosStore()
   const veterinarioStore = useVeterinariosStore()
   const atencionStore = useAtencionesStore()
-
+  const turnoStore = useTurnosStore()
 
   const mensaje = ref('')
   const estado = ref('')
@@ -40,6 +40,7 @@
     propietarioStore.reset()
     veterinarioStore.reset()
     atencionStore.reset()
+    turnoStore.reset()
   }
 
   function confirmarAccion(accion: string) {
